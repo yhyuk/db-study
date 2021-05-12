@@ -1,2 +1,4 @@
 # Oracle_Study
-Oracle Database
+This is the Oracle Database class material.
+
+period : 2021.05.12 ~
