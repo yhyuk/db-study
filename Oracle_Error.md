@@ -1,11 +1,11 @@
 ORA-01438: value larger than specified precision allowed for this column
 insert into tblType (num) values (9999)
 
-###오타에러
-ORA-00942: table or view does not exist
-select * from employee;
+####오타에러    
+ORA-00942: table or view does not exist     
+select * from employee;      
 방법: 
-
+ 
 ###오타에러
 ORA-00904: "FIRSTNAME": invalid identifier
 select firstname from employees;
