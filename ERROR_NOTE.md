@@ -1,4 +1,4 @@
-#### 에러노트입니당
+# Oracle DATABASE - ERROR_NOTE 
 
 ## 허용값 초과
 ORA-01438: value larger than specified precision allowed for this column   
