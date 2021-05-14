@@ -71,12 +71,14 @@ from tblInsa;
 select count(distinct buseo) from tblInsa;
 
 --tblComedian 남자 몇명?, 여자 몇명?
+--방법1
 select * from tblComedian;
 select count(*) from tblcomedian;
 select count(*) from tblcomedian where gender = 'm';
 select count(*) from tblcomedian where gender = 'f';
 
 -- 전체 인원수, 남자 인숸수, 여자 인원수 -> 결과 셋
+--방법2
 SELECT
     COUNT(*) AS "전체 인원수",
     COUNT(CASE

@@ -14,7 +14,6 @@ SELECT * FROM tblCountry;
 -- tblCountry. 어떤 대륙? -> 분류 질문
 SELECT CONTINENT FROM tblCountry;           --각 나라들의 대륙이 여러번(중복)으로 나옴
 SELECT DISTINCT CONTINENT FROM tblCountry;  --중복제거
-
 SELECT * FROM tblInsa;
 
 -- tblInsa. 어떤 부서?

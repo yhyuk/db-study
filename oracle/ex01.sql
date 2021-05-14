@@ -1,155 +1,156 @@
 -- ex01.sql
 
---  ´ÜÀÏ¶óÀÎ ÁÖ¼®
+--  ë‹¨ì¼ë¼ì¸ ì£¼ì„
 
 /*
-    ´ÙÁß¶óÀÎÁÖ¼®
+    ë‹¤ì¤‘ë¼ì¸ì£¼ì„
 */
 
 /*
-    ¿À¶óÅ¬, Oracle
-    - È¸»ç¸í, Á¦Ç°¸í
-    - µ¥ÀÌÅÍº£ÀÌ½º(Database) -> µ¥ÀÌÅÍº£ÀÌ½º °ü¸® ½Ã½ºÅÛ(Database Management System. DBMS)
-        -> °ü°èÇü µ¥ÀÌÅÍº£ÀÌ½º °ü¸® ½Ã½ºÅÛ(Relational DBMS, RDBMS)
-    - ÇÁ·ÎÁ§Æ® ÇÏ½Ç¶§ DBMS ¹¹¾²½É? -> Oracle 11g
-    - ÇÁ·ÎÁ§Æ® ÇÏ½Ç¶§ DB Å¬¶óÀÌ¾ðÆ® ¹¹¾²½É ?  SQL Developer
+    ì˜¤ë¼í´, Oracle
+    - íšŒì‚¬ëª…, ì œí’ˆëª…
+    - ë°ì´í„°ë² ì´ìŠ¤(Database) -> ë°ì´í„°ë² ì´ìŠ¤ ê´€ë¦¬ ì‹œìŠ¤í…œ(Database Management System. DBMS)
+        -> ê´€ê³„í˜• ë°ì´í„°ë² ì´ìŠ¤ ê´€ë¦¬ ì‹œìŠ¤í…œ(Relational DBMS, RDBMS)
+    - í”„ë¡œì íŠ¸ í•˜ì‹¤ë•Œ DBMS ë­ì“°ì‹¬? -> Oracle 11g
+    - í”„ë¡œì íŠ¸ í•˜ì‹¤ë•Œ DB í´ë¼ì´ì–¸íŠ¸ ë­ì“°ì‹¬ ?  SQL Developer
 */
 
 /*
-    ´Ù¿î·Îµå
+    ë‹¤ìš´ë¡œë“œ
     
     1.OracleXE112_Win64
-    - µ¥ÀÌÅÍº£ÀÌ½º ÇÁ·Î±×·¥(DBMS)
+    - ë°ì´í„°ë² ì´ìŠ¤ í”„ë¡œê·¸ëž¨(DBMS)
     
     2.sqldeveloper-20.4.1.407.0006-x64
-    - µ¥ÀÌÅÍº£ÀÌ½º Å¬¶óÀÌ¾ðÆ® ÇÁ·Î±×·¥
+    - ë°ì´í„°ë² ì´ìŠ¤ í´ë¼ì´ì–¸íŠ¸ í”„ë¡œê·¸ëž¨
 
-    µ¥ÀÌÅÍ Data
-    - °¡°øµÈ Á¤º¸
+    ë°ì´í„° Data
+    - ê°€ê³µëœ ì •ë³´
     
-    µ¥ÀÌÅÍº£ÀÌ½º, Database
-    - µ¥ÀÌÅÍÀÇ ÁýÇÕ
-    - µ¥ÀÌÅÍÀÇ ÁýÇÕÀ» Áö¿øÇÏ´Â ÇÁ·Î±×·¥
+    ë°ì´í„°ë² ì´ìŠ¤, Database
+    - ë°ì´í„°ì˜ ì§‘í•©
+    - ë°ì´í„°ì˜ ì§‘í•©ì„ ì§€ì›í•˜ëŠ” í”„ë¡œê·¸ëž¨
+    - ì˜¤ë¼í´(Oracle)
     
-    µ¥ÀÌÅÍº£ÀÌ½º °ü¸® ½Ã½ºÅÛ, Database Management System
-    - µ¥ÀÌÅÍº£ÀÌ½º + Ãß°¡ÀÛ¾÷ -> ÅëÇÕ ½Ã½ºÅÛ
-    - ¿À¶óÅ¬(Oracle)ÀÌ¶ó°í ÇÑ´Ù.
+    ë°ì´í„°ë² ì´ìŠ¤ ê´€ë¦¬ ì‹œìŠ¤í…œ, Database Management System
+    - ë°ì´í„°ë² ì´ìŠ¤ + ì¶”ê°€ìž‘ì—… -> í†µí•© ì‹œìŠ¤í…œ
+    - ì˜¤ë¼í´(Oracle)
     
-    <°ü¸® ½Ã½ºÅÛÀÇ Áß¿ä¼º>
-    1. µ¥ÀÌÅÍ ¹«°á¼º  
-        - µ¥ÀÌÅÍ¿¡ ¿À·ù°¡ ÀÖÀ¸¸é ¾ÈµÈ´Ù.
-        - Á¦¾àÁ¶°Ç(Constraint)¸¦ »ç¿ëÇÑ´Ù.
+    <ê´€ë¦¬ ì‹œìŠ¤í…œì˜ ì¤‘ìš”ì„±>
+    1. ë°ì´í„° ë¬´ê²°ì„±  
+        - ë°ì´í„°ì— ì˜¤ë¥˜ê°€ ìžˆìœ¼ë©´ ì•ˆëœë‹¤.
+        - ì œì•½ì¡°ê±´(Constraint)ë¥¼ ì‚¬ìš©í•œë‹¤.
     
-    2. µ¥ÀÌÅÍ µ¶¸³¼º
-        - µ¥ÀÌÅÍº£ÀÌ½º¿¡ º¯È­°¡ ¹ß»ýÇÏ´õ¶óµµ °ü°èµÈ ÀÀ¿ë ÇÁ·Î±×·¥µéÀº ¿µÇâÀ» ¹ÞÁö ¾Ê´Â´Ù.
+    2. ë°ì´í„° ë…ë¦½ì„±
+        - ë°ì´í„°ë² ì´ìŠ¤ì— ë³€í™”ê°€ ë°œìƒí•˜ë”ë¼ë„ ê´€ê³„ëœ ì‘ìš© í”„ë¡œê·¸ëž¨ë“¤ì€ ì˜í–¥ì„ ë°›ì§€ ì•ŠëŠ”ë‹¤.
         
-    3. º¸¾È
-        - µ¥ÀÌÅÍº£ÀÌ½º³»ÀÇ µ¥ÀÌÅÍ¸¦ ÇÔºÎ·Î °Ì±Ù ¹æÁö
-        - ¼ÒÀ¯ÁÖ³ª Á¢±Ù±ÇÇÑÀÌ ÀÖ´Â »ç¿ëÀÚ¸¸ Á¢±Ù °¡´É, ÅëÁ¦ °¡´É
+    3. ë³´ì•ˆ
+        - ë°ì´í„°ë² ì´ìŠ¤ë‚´ì˜ ë°ì´í„°ë¥¼ í•¨ë¶€ë¡œ ê²ê·¼ ë°©ì§€
+        - ì†Œìœ ì£¼ë‚˜ ì ‘ê·¼ê¶Œí•œì´ ìžˆëŠ” ì‚¬ìš©ìžë§Œ ì ‘ê·¼ ê°€ëŠ¥, í†µì œ ê°€ëŠ¥
         
-    4. µ¥ÀÌÅÍ Áßº¹ ÃÖ¼ÒÈ­
-        - µ¿ÀÏÇÑ µ¥ÀÌÅÍ°¡ ¿©·¯°÷¿¡ ¿©·¯¹ø ÀúÀåµÇ´Â °ÍÀ» ¹æÁöÇÑ´Ù.
+    4. ë°ì´í„° ì¤‘ë³µ ìµœì†Œí™”
+        - ë™ì¼í•œ ë°ì´í„°ê°€ ì—¬ëŸ¬ê³³ì— ì—¬ëŸ¬ë²ˆ ì €ìž¥ë˜ëŠ” ê²ƒì„ ë°©ì§€í•œë‹¤.
         
-    5. µ¥ÀÌÅÍ ¾ÈÁ¤¼º
-        - µ¥ÀÌÅÍ ¹é¾÷/º¹¿ø ±â´ÉÀ» Á¦°øÇÑ´Ù.
+    5. ë°ì´í„° ì•ˆì •ì„±
+        - ë°ì´í„° ë°±ì—…/ë³µì› ê¸°ëŠ¥ì„ ì œê³µí•œë‹¤.
         
-    <DBMS Á¾·ù>
-    1. °èÃþÇü DBMS
-    2. ¸ÁÇü DBMS
-    3. °ü°èÇü DBMS > ÇöÀç °¡Àå¸¹ÀÌ ¾²ÀÌ´Â DBMS > µ¥ÀÌÅÍ¸¦ 'Ç¥' ÇüÅÂ·Î ÀúÀå/°ü¸®
-    4. °´Ã¼ÁöÇâÇü DBMS
-    5. °´Ã¼°ü°èÇü DBMS
+    <DBMS ì¢…ë¥˜>
+    1. ê³„ì¸µí˜• DBMS
+    2. ë§í˜• DBMS
+    3. ê´€ê³„í˜• DBMS > í˜„ìž¬ ê°€ìž¥ë§Žì´ ì“°ì´ëŠ” DBMS > ë°ì´í„°ë¥¼ 'í‘œ' í˜•íƒœë¡œ ì €ìž¥/ê´€ë¦¬
+    4. ê°ì²´ì§€í–¥í˜• DBMS
+    5. ê°ì²´ê´€ê³„í˜• DBMS
 
 
-    °ü°èÇü DB °ü¸® ½Ã½ºÅÛ > Á¦Ç° Á¾·ù
+    ê´€ê³„í˜• DB ê´€ë¦¬ ì‹œìŠ¤í…œ > ì œí’ˆ ì¢…ë¥˜
     1. Oracle
         - Oracle
-        - ±â¾÷¿ë (°³ÀÎ¿ëÀ¸·Î´Â Àß ¾È¾²ÀÓ > ºñ½Î¼­...)
+        - ê¸°ì—…ìš© (ê°œì¸ìš©ìœ¼ë¡œëŠ” ìž˜ ì•ˆì“°ìž„ > ë¹„ì‹¸ì„œ...)
         
     2. MS-SQL
         - Microsoft
-        - ±â¾÷¿ë
+        - ê¸°ì—…ìš©
         
     3. MySQL
         - Oracle
-        - °³ÀÎ¿ë + ±â¾÷¿ë
+        - ê°œì¸ìš© + ê¸°ì—…ìš©
         
     4. MariaDB
-        - MySQL ±â¹Ý
-        - ¹«·á
-        - °³ÀÎ¿ë + ±â¾÷¿ë 
+        - MySQL ê¸°ë°˜
+        - ë¬´ë£Œ
+        - ê°œì¸ìš© + ê¸°ì—…ìš© 
         
     5. PostgreSQL
-        - Æ÷½ºÆ®±×·¹½ºÅ¥¿¤
-        - ¹«·á
-        - °³ÀÎ + ±â¾÷¿ë
+        - í¬ìŠ¤íŠ¸ê·¸ë ˆìŠ¤íì—˜
+        - ë¬´ë£Œ
+        - ê°œì¸ + ê¸°ì—…ìš©
         
     6. DB2
         - IBM
-        - ¸ÞÀÎÇÁ·¹ÀÓ
+        - ë©”ì¸í”„ë ˆìž„
     
     7. Access
         - MS
-        - °³ÀÎ¿ë + ¼Ò±Ô¸ð
+        - ê°œì¸ìš© + ì†Œê·œëª¨
     
-    8. Æ¼º£·Î
-        - Æ¼¸Æ½º(TMax)
+    8. í‹°ë² ë¡œ
+        - í‹°ë§¥ìŠ¤(TMax)
         
     9. SQLite
-        - °æ·®
-        - ¸ð¹ÙÀÏ µî..  
+        - ê²½ëŸ‰
+        - ëª¨ë°”ì¼ ë“±..  
     -------------------------------------------------------------------------------------------    
     Oracle
-    - UI°¡ ¾ø´Â ÇÁ·Î±×·¥(´«¿¡ ¾Èº¸ÀÌ´Â ÇÁ·Î±×·¥, ¼­ºñ½º)    
+    - UIê°€ ì—†ëŠ” í”„ë¡œê·¸ëž¨(ëˆˆì— ì•ˆë³´ì´ëŠ” í”„ë¡œê·¸ëž¨, ì„œë¹„ìŠ¤)    
     
-    µ¥ÀÌÅÍº£ÀÌ½º Å¬¶óÀÌ¾ðÆ® ÇÁ·Î±×·¥
-    - UI°¡ ¾ø´Â ¿À¶óÅ¬¿¡ Á¢¼ÓÀ» ÇØ¼­ > Á¶ÀÛÀ» µµ¿ÍÁÖ´Â Åø
+    ë°ì´í„°ë² ì´ìŠ¤ í´ë¼ì´ì–¸íŠ¸ í”„ë¡œê·¸ëž¨
+    - UIê°€ ì—†ëŠ” ì˜¤ë¼í´ì— ì ‘ì†ì„ í•´ì„œ > ì¡°ìž‘ì„ ë„ì™€ì£¼ëŠ” íˆ´
       
      1. SQL Developer
-        - ¹«·á
+        - ë¬´ë£Œ
         - Oracle
         
     2. Toad
-        - À¯·á
-        - Á¡À¯À² ÃÖ»ó
+        - ìœ ë£Œ
+        - ì ìœ ìœ¨ ìµœìƒ
         
     3. SQLGate
     
     4. DataGrip(JetBrain)
-        - 30ÀÏ Æò°¡ÆÇ 
-        - ´ëÇÐ±³ ÀÌ¸ÞÀÏ(¹«·á)
+        - 30ì¼ í‰ê°€íŒ 
+        - ëŒ€í•™êµ ì´ë©”ì¼(ë¬´ë£Œ)
     
     5. Eclipse
     
     6. SQL*Plus
-    - ¿À¶óÅ¬À» ¼³Ä¡ÇÏ¸é ÀÚµ¿À¸·Î °°ÀÌ ¼³Ä¡µÇ´Â Å¬¶óÀÌ¾ðÆ® Åø
+    - ì˜¤ë¼í´ì„ ì„¤ì¹˜í•˜ë©´ ìžë™ìœ¼ë¡œ ê°™ì´ ì„¤ì¹˜ë˜ëŠ” í´ë¼ì´ì–¸íŠ¸ íˆ´
     - CLI(Command Line Interface)
     ----------------------------------------------------------------------------------------------
     
-    ¿À¶óÅ¬ ¹öÀü
+    ì˜¤ë¼í´ ë²„ì „
     - Oracle 11g Express Edition
     - Oracle 1.0 ~ 21c
     
-    ¿À¶óÅ¬ ¿¡µð¼Ç
+    ì˜¤ë¼í´ ì—ë””ì…˜
     - Express Edition
-        - ¹«·á, »ó¿ë °¡´É(°³¹ß¿ë), ±â´ÉÁ¦ÇÑ
+        - ë¬´ë£Œ, ìƒìš© ê°€ëŠ¥(ê°œë°œìš©), ê¸°ëŠ¥ì œí•œ
         - 11g XE, 18c XE
     - Enterprise Edition
-        -»ó¿ë
+        -ìƒìš©
         
         
-    ¿À¶óÅ¬ ¼³Ä¡
-    -> ¿À¶óÅ¬ÀÌ Àß µ¿ÀÛÇÏ°í ÀÖ´ÂÁö?
-    -> ½ÃÀÛ or Á¾·á?
+    ì˜¤ë¼í´ ì„¤ì¹˜
+    -> ì˜¤ë¼í´ì´ ìž˜ ë™ìž‘í•˜ê³  ìžˆëŠ”ì§€?
+    -> ì‹œìž‘ or ì¢…ë£Œ?
     
-    1. ½ÇÇàÃ¢ > services.msc
-    2. Oracle·Î½ÃÀÛÇÏ´Â ´Ü¾î
+    1. ì‹¤í–‰ì°½ > services.msc
+    2. Oracleë¡œì‹œìž‘í•˜ëŠ” ë‹¨ì–´
         - OracleServiceXE 
-            - µ¥ÀÌÅÍº£ÀÌ½º ÇÁ·Î±×·¥
+            - ë°ì´í„°ë² ì´ìŠ¤ í”„ë¡œê·¸ëž¨
         - OracleXETNSListener
-            - ¿À¶óÅ¬°ú Å¬¶óÀÌ¾ðÆ® ÇÁ·Î±×·¥À» ¿¬°á½ÃÄÑ ÁÖ´Â ÇÁ·Î±×·¥
-        - À§ 2°¡Áö¸¸ ±âº»ÀûÀ¸·Î ¾Ë°íÀÖÀÚ.
-        - Ç×»ó ½ÇÇàÁßÀ¸·Î ÀÖ¾î¾ßÇÔ
+            - ì˜¤ë¼í´ê³¼ í´ë¼ì´ì–¸íŠ¸ í”„ë¡œê·¸ëž¨ì„ ì—°ê²°ì‹œì¼œ ì£¼ëŠ” í”„ë¡œê·¸ëž¨
+        - ìœ„ 2ê°€ì§€ë§Œ ê¸°ë³¸ì ìœ¼ë¡œ ì•Œê³ ìžˆìž.
+        - í•­ìƒ ì‹¤í–‰ì¤‘ìœ¼ë¡œ ìžˆì–´ì•¼í•¨
         
 
 
@@ -158,130 +159,135 @@
 
 
 
-    ¿­·ÁÀÖ´Â ÆÄÀÏ(ex01.sql , localhost.system) 2°³
-    -> ½ºÅ©¸³Æ® ÆÄÀÏ(*.sql), ¿öÅ© ½ÃÆ® ÆÄÀÏ(*.sql)
-    -> ¿À¶óÅ¬(µ¥ÀÌÅÍº£ÀÌ½º ¼­¹ö)¿Í ´ëÈ­¸¦ ÇÏ±âÀ§ÇÑ ÀÛ¾÷(ÀÚ¹Ù·Î µûÁö¸é ¼Ò½ºÆÄÀÏ(*java))
+    ì—´ë ¤ìžˆëŠ” íŒŒì¼(ex01.sql , localhost.system) 2ê°œ
+    -> ìŠ¤í¬ë¦½íŠ¸ íŒŒì¼(*.sql), ì›Œí¬ ì‹œíŠ¸ íŒŒì¼(*.sql)
+    -> ì˜¤ë¼í´(ë°ì´í„°ë² ì´ìŠ¤ ì„œë²„)ì™€ ëŒ€í™”ë¥¼ í•˜ê¸°ìœ„í•œ ìž‘ì—…(ìžë°”ë¡œ ë”°ì§€ë©´ ì†ŒìŠ¤íŒŒì¼(*java))
+    -> ë¬¸ìž¥ ë‹¨ìœ„ ì‹¤í–‰
     
-    ½ºÅ©¸³Æ® ½ÇÇà ¹æ¹ý
-    -> ½ÇÇàÇÒ ¸í·É¾î(¹®Àå)À» ¼±ÅÃÇÑ´Ù.
-    -> ½ÇÇà: Ctrl + Enter
-    -> ½ºÅ©¸³Æ®´Â ¹®Àå ´ÜÀ§·Î ½ÇÇàÇÑ´Ù.
+    ìŠ¤í¬ë¦½íŠ¸ ì‹¤í–‰ ë°©ë²•
+    -> ì‹¤í–‰í•  ëª…ë ¹ì–´(ë¬¸ìž¥)ì„ ì„ íƒí•œë‹¤.
+    -> ì‹¤í–‰: Ctrl + Enter
+    -> ìŠ¤í¬ë¦½íŠ¸ëŠ” ë¬¸ìž¥ ë‹¨ìœ„ë¡œ ì‹¤í–‰í•œë‹¤.
     
-    °èÁ¤
-    1. °ü¸®ÀÚ °èÁ¤ 
+    ê³„ì •
+    1. ê´€ë¦¬ìž ê³„ì • 
         - sys.system
         
-    2. ÀÏ¹Ý »ç¿ëÀÚ °èÁ¤
-        - ±ÇÇÑÀÌ ÀÏºÎ Á¦ÇÑµÇ¾î ÀÖ´Â °èÁ¤
-        - »ý¼º(³ªÁß¿¡)
-        - ÇÐ½À¿ë °èÁ¤ Á¦°ø > scott, hr(»ç¿ë ±ÝÁö -> ÇØÁ¦)
+    2. ì¼ë°˜ ì‚¬ìš©ìž ê³„ì •
+        - ê¶Œí•œì´ ì¼ë¶€ ì œí•œë˜ì–´ ìžˆëŠ” ê³„ì •
+        - ìƒì„±(ë‚˜ì¤‘ì—)
+        - í•™ìŠµìš© ê³„ì • ì œê³µ > scott, hr(ì‚¬ìš© ê¸ˆì§€ -> í•´ì œ)
 
 */
 
---°èÁ¤ÀÌ Àá°ÜÀÖ´Ù. > È°¼ºÈ­
---alter user °èÁ¤¸í account unlock;
-alter user hr account unlock; --User HRÀÌ(°¡) º¯°æµÇ¾ú½À´Ï´Ù.
+--ê³„ì •ì´ ìž ê²¨ìžˆë‹¤. > í™œì„±í™”
+--alter user ê³„ì •ëª… account unlock;
+alter user hr account unlock; --User HRì´(ê°€) ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤.
 
---ºñ¹Ð¹øÈ£ º¯°æ
-alter user hr identified by java1234; --User HRÀÌ(°¡) º¯°æµÇ¾ú½À´Ï´Ù.
+--ë¹„ë°€ë²ˆí˜¸ ë³€ê²½
+alter user hr identified by java1234; --User HRì´(ê°€) ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤.
 
---À§¿¡ °èÁ¤¸í, ºñ¹Ð¹øÈ£¸¦ ÇÕÄ£ ÇÑÁÙ·Î ÀÛ¼ºÇÑ ÄÚµå
+--ìœ„ì— ê³„ì •ëª…, ë¹„ë°€ë²ˆí˜¸ë¥¼ í•©ì¹œ í•œì¤„ë¡œ ìž‘ì„±í•œ ì½”ë“œ
 alter user hr account unlock identified by java1234;
 
---³»°¡ Áö±Ý system(°ü¸®ÀÚ)ÀÎÁö, hr(ÀÏ¹Ý »ç¿ëÀÚ)ÀÎÁö ±¸ºÐÇÏ´Â¹ý??
+--ë‚´ê°€ ì§€ê¸ˆ system(ê´€ë¦¬ìž)ì¸ì§€, hr(ì¼ë°˜ ì‚¬ìš©ìž)ì¸ì§€ êµ¬ë¶„í•˜ëŠ”ë²•?
 
---¹æ¹ý1 tabs È®ÀÎÇÏ±â
---system -> 154 line ¿À¸¥ÂÊ »ó´Ü µå·³ÅëÀ» localhost.systemÀ» hr·Î º¯°æ ÈÄ 
+--ë°©ë²•1 tabs í™•ì¸í•˜ê¸°
+--system -> 154 line ì˜¤ë¥¸ìª½ ìƒë‹¨ ë“œëŸ¼í†µì„ localhost.systemì„ hrë¡œ ë³€ê²½ í›„ 
 --hr -> 7 line
 select * from tabs;
 
 
---¹æ¹ý2 »ç¿ëÀÚ È®ÀÎÇÏ±â
+--ë°©ë²•2 ì‚¬ìš©ìž í™•ì¸í•˜ê¸°
 show user;
 
---°á·Ð: ¿À¸¥ÂÊ »ó´Ü µå·³ÅëÀ» Àß È®ÀÎÇÕ½Ã´Ù!! ½Ç¼ö ¸¹ÀÌÇÔ!!
+--ê²°ë¡ : ì˜¤ë¥¸ìª½ ìƒë‹¨ ë“œëŸ¼í†µì„ ìž˜ í™•ì¸í•©ì‹œë‹¤!! ì‹¤ìˆ˜ ë§Žì´í•¨!!
 
 
-
---DB ¼­¹ö ¼³Ä¡(¿À¶óÅ¬ ¼­¹ö) -> DB Å¬¶óÀÌ¾ðÆ® Åø(SQL Developer) > hr °èÁ¤È°¼ºÈ­ > DB¼­¹ö Á¢¼Ó
 
 /*
 
-    °ü°èÇü DB
-    - µ¥ÀÌÅÍ¸¦ Ç¥ÇüÅÂ·Î ÀúÀå/°ü¸® ÇÑ´Ù.
-    - µ¥ÀÌÅÍ³¢¸®ÀÇ °ü°è¸¦ °ü¸®ÇÑ´Ù.
-    - Ç¥(Å×ÀÌºí)ÀÇ ÁýÇÕ
+    ê´€ê³„í˜• DB
+    - ë°ì´í„°ë¥¼ í‘œí˜•íƒœë¡œ ì €ìž¥/ê´€ë¦¬ í•œë‹¤.
+    - ë°ì´í„°ë¼ë¦¬ì˜ ê´€ê³„ë¥¼ ê´€ë¦¬í•œë‹¤.
+    - í‘œ(í…Œì´ë¸”)ì˜ ì§‘í•©
+        í…Œì´ë¸” 
+        - ì—´(ì»¬ëŸ¼)ì˜ ì§‘í•© > í…Œì´ë¸”ì˜ êµ¬ì¡° > ìŠ¤í‚¤ë§ˆ(Schema)
     
-    localhost.hr
-    - Å×ÀÌºí
-        - countries
-        - departments
-        - employees
-    - ºä
-    - ÀÎµ¦½º
-    - ÆÐÅ°Áö
-    - ÇÁ·Î½ÃÀú
-    - ¿¬»êÀÚ
-    - ÇÔ¼ö
-    - ...
+        ì—´, Column
+        - ì»¬ëŸ¼, í•„ë“œ(Field), ì†ì„±(Attribute), íŠ¹ì„±(Property)
+        - ì„¸ë¶€ì •ë³´
     
-    1. Å×ÀÌºí 
-    - ¿­(ÄÃ·³)ÀÇ ÁýÇÕ > Å×ÀÌºíÀÇ ±¸Á¶ > ½ºÅ°¸¶(Schema)
+        í–‰, Row
+        - í–‰, ë¡œìš°, ë ˆì½”ë“œ(Record), íŠœí”Œ(Tuple)
+        - í…Œì´ë¸”ì˜ ì‹¤ì²´í™”ëœ ë°ì´í„° 1ê±´
+        - Object(ê°ì²´)
     
-    ¿­, Column
-    - ÄÃ·³, ÇÊµå(Field), ¼Ó¼º(Attribute), Æ¯¼º(Property)
-    - ¼¼ºÎÁ¤º¸
+    SQL, Structured Query Language
+    - êµ¬ì¡°í™”ëœ ì§ˆì˜ ì–¸ì–´
+    - ì‚¬ìš©ìž(í´ë¼ì´ì–¸íŠ¸ íˆ´)ê°€ ê´€ê³„í˜• ë°ì´í„°ë² ì´ìŠ¤ì™€ ëŒ€í™”í•  ë•Œ ì‚¬ìš©í•˜ëŠ” ì–¸ì–´
+    - ìžë°”ì— ë¹„í•´ ìžì—°ì–´ì— ê°€ê¹ë‹¤.
     
-    Çà, Row
-    - Çà, ·Î¿ì, ·¹ÄÚµå(Record), Æ©ÇÃ(Tuple)
-    - Å×ÀÌºíÀÇ ½ÇÃ¼È­µÈ µ¥ÀÌÅÍ 1°Ç
-    - Object(°´Ã¼)
+    1. DBMS ì œìž‘ì‚¬ì™€ ë…ë¦½ì ì´ë‹¤.
+    - SQLì€ ëª¨ë“  DBMSì— ê³µí†µì´ë‹¤.
+    
+    2. í‘œì¤€ SQL(ANSI-SQL)
+    - ëª¨ë“  DBMSëŠ” í‘œì¤€ SQLë¥¼ ì§€ì›í•˜ë„ë¡ ì„¤ê³„ë˜ì–´ ìžˆë‹¤.
+    - SQL-86 ... SQL92... SQL-2011
+    
+    3. ëŒ€í™”ì‹ ì–¸ì–´ë‹¤.
+    - ì§ˆë¬¸ > ë‹µë³€ > ì§ˆë¬¸ > ë‹µë³€ > ì§ˆë¬¸...    
+        
 
-    SQL(¿À¶óÅ¬ ±âÁØ)
+    SQL(ì˜¤ë¼í´ ê¸°ì¤€)
     1. ANSI SQL
-        -Ç¥ÁØ SQL
-        - ¸í·É¾î µéÀ» ¼º°Ý¿¡ µû¶ó ºÐ·ù
+        - í‘œì¤€ SQL
+
     2. PL/SQL
-        - ÀÚÃ¼ SQL
-        - ¿À¶óÅ¬¿¡¼­¸¸ µ¿ÀÛµÇ´Â ¸í·É¾î
+        - ìžì²´ SQL
+        - ì˜¤ë¼í´ì—ì„œë§Œ ë™ìž‘ë˜ëŠ” ëª…ë ¹ì–´
         
     
     
-    
-    
-    1. DDL(µ¥ÀÌÅÍ Á¤ÀÇ¾î)
+    <ANSI SQL ì¢…ë¥˜>
+    - ëª…ë ¹ì–´ë“¤ì„ ì„±ê²©ì— ë”°ë¼ ë¶„ë¥˜
+    1. DDL(ë°ì´í„° ì •ì˜ì–´)
         - Data Definition Language
-        - ±¸Á¶¸¦ ¸¸µå´Â ¾ð¾î
-        - Å×ÀÌºí, ºä, »ç¿ëÀÚ, ÀÎµ¦½º µîÀÇ °´Ã¼(DB Object)¸¦ »ý¼º, ¼öÁ¤, »èÁ¦ ÇÏ´Â ¸í·É¾î
-        - DB °ü¸®ÀÚ, DB ´ã´çÀÚ, ÇÁ·Î±×·¡¸Ó(ÀÏºÎ)¸¸ »ç¿ë.. 
-        - create(ÀÐ±â), drop(»èÁ¦), alter(¼öÁ¤)
+        - êµ¬ì¡°ë¥¼ ë§Œë“œëŠ” ì–¸ì–´
+        - í…Œì´ë¸”, ë·°, ì‚¬ìš©ìž, ì¸ë±ìŠ¤ ë“±ì˜ ê°ì²´(DB Object)ë¥¼ ìƒì„±, ìˆ˜ì •, ì‚­ì œ í•˜ëŠ” ëª…ë ¹ì–´
+        - DB ê´€ë¦¬ìž, DB ë‹´ë‹¹ìž, í”„ë¡œê·¸ëž˜ë¨¸(ì¼ë¶€)ë§Œ ì‚¬ìš©.. 
+        - create(ì½ê¸°), drop(ì‚­ì œ), alter(ìˆ˜ì •)
     
-    2. DML(µ¥ÀÌÅÍ Á¶ÀÛ¾î)
+    2. DML(ë°ì´í„° ì¡°ìž‘ì–´)
         - Data Manipulation Language
-        - µ¥ÀÌÅÍº£ÀÌ½ºÀÇ µ¥ÀÌÅÍ¸¦ Ãß°¡, ¼öÁ¤, »èÁ¦, Á¶È¸ÇÏ´Â ¸í·É¾î
-        - DB °ü¸®ÀÚ, DB ´ã´çÀÚ, ÇÁ·Î±×·¡¸Ó(ÀÏºÎ)¸¸ »ç¿ë..
-        - select(ÀÐ±â), insert(Ãß°¡), update(¼öÁ¤), delete(»èÁ¦)
+        - ë°ì´í„°ë² ì´ìŠ¤ì˜ ë°ì´í„°ë¥¼ ì¶”ê°€, ìˆ˜ì •, ì‚­ì œ, ì¡°íšŒí•˜ëŠ” ëª…ë ¹ì–´
+        - DB ê´€ë¦¬ìž, DB ë‹´ë‹¹ìž, í”„ë¡œê·¸ëž˜ë¨¸(ì¼ë¶€)ë§Œ ì‚¬ìš©..
+        - select(ì½ê¸°), insert(ì¶”ê°€), update(ìˆ˜ì •), delete(ì‚­ì œ)
+        - select(ì½ê¸°)ê°€ ê°€ìž¥ ì¤‘ìš”í•˜ë‹¤ **********************
     
-    3. DCL(µ¥ÀÌÅÍ Á¦¾î¾î)
+    3. DCL(ë°ì´í„° ì œì–´ì–´)
         - Data Control Language
-        - °èÁ¤, º¸¾È, Æ®·£Àè¼Ç µîÀ» Á¦¾î
-        - DB °ü¸®ÀÚ, DB ´ã´çÀÚ, ÇÁ·Î±×·¡¸Ó(ÀÏºÎ)¸¸ »ç¿ë..
+        - ê³„ì •, ë³´ì•ˆ, íŠ¸ëžœìž­ì…˜ ë“±ì„ ì œì–´
+        - DB ê´€ë¦¬ìž, DB ë‹´ë‹¹ìž, í”„ë¡œê·¸ëž˜ë¨¸(ì¼ë¶€)ë§Œ ì‚¬ìš©..
         - commit, rollback, grant, revoke
         
-    4. DQL(µ¥ÀÌÅÍ ÁúÀÇ¾î)
+    4. DQL(ë°ì´í„° ì§ˆì˜ì–´)
         - Data Query Language
-        - DML Áß¿¡ select¸¸À» ÀÌ·¸°Ô µû·Î ÄªÇÑ´Ù.
+        - DML ì¤‘ì— selectë§Œì„ ì´ë ‡ê²Œ ë”°ë¡œ ì¹­í•œë‹¤.
         
     5. TCL
         - Transaction Control Language
-        - DCL Áß¿¡ commit, rollback¸¸À» ÀÌ·¸°Ô µû·Î ÄªÇÑ´Ù.
-
+        - DCL ì¤‘ì— commit, rollbackë§Œì„ ì´ë ‡ê²Œ ë”°ë¡œ ì¹­í•œë‹¤.
+        
+        
+    <ì˜¤ë¼í´ ê¸°ë³¸ ì¸ì½”ë”©>
+    - ~ 8i : EUC-KR
+    - 9i ~ : UTF-8
 
 */
 
---ÇöÀç °èÁ¤(HR)ÀÌ ¼ÒÀ¯ÇÏ°í ÀÖ´Â Å×ÀÌºí ¸ñ·ÏÀ» º¸¿©ÁÖ¼¼¿ä
---SQLÀº Å°¿öµåÀÇ ´ë¼Ò¹®ÀÚ¸¦ ±¸ºÐÇÏÁö ¾Ê´Â´Ù.(º¸Åë ´ë¹®ÀÚ·Î ¸¹ÀÌ¾´´Ù.)
+--í˜„ìž¬ ê³„ì •(HR)ì´ ì†Œìœ í•˜ê³  ìžˆëŠ” í…Œì´ë¸” ëª©ë¡ì„ ë³´ì—¬ì£¼ì„¸ìš”
+--SQLì€ í‚¤ì›Œë“œì˜ ëŒ€ì†Œë¬¸ìžë¥¼ êµ¬ë¶„í•˜ì§€ ì•ŠëŠ”ë‹¤.(ë³´í†µ ëŒ€ë¬¸ìžë¡œ ë§Žì´ì“´ë‹¤.)
 select * from tabs;
 SELECT * FROM tabs;
-
 

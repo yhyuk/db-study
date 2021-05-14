@@ -104,7 +104,7 @@ select first_name from employees
     where first_name > 'M';
 select first_name from employees 
     where first_name >= 'M' and first_name <= 'O';
-select first_name from employees 
+select * from employees 
     where first_name between 'M' and 'O';
 
 
@@ -144,7 +144,6 @@ select * from tblInsa
     where jikwi in ('부장', '과장') and city in ('서울', '인천')
             and basicpay between 2500000 and 2600000;
 
-
 /*
 
     like
@@ -170,13 +169,13 @@ select name from tblInsa where name like '김___'; --김OOO
 select name from tblInsa where name like '김_'; --김O
 
 --예제2
-select first_name from employees;
-select first_name from employees where first_name like 'E____'; -- Ellen, Eleni
-select first_name from employees where first_name like 'E%'; --E로 시작되는
-select first_name from employees where first_name like '%e'; --e로 끝나는
-select first_name from employees where first_name like '%e%'; --e가 들어간
-select first_name from employees where first_name like '%ea%'; --ea가 들어간
-select first_name from employees where first_name like '%e%a%'; --e랑a가 들어간
+select FIRST_NAME from EMPLOYEES;
+select FIRST_NAME from EMPLOYEES where FIRST_NAME like 'E____'; -- Ellen, Eleni
+select FIRST_NAME from EMPLOYEES where FIRST_NAME like 'E%'; --E로 시작되는
+select FIRST_NAME from EMPLOYEES where FIRST_NAME like '%e'; --e로 끝나는
+select FIRST_NAME from EMPLOYEES where FIRST_NAME like '%e%'; --e가 들어간
+select FIRST_NAME from EMPLOYEES where FIRST_NAME like '%ea%'; --ea가 들어간
+select FIRST_NAME from EMPLOYEES where FIRST_NAME like '%e%a%'; --e랑a가 들어간
 
 
 
