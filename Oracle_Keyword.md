@@ -36,9 +36,8 @@ SELECT * FROM EMP WHERE NAME LIKE '%LA%'; --> 대문자 LA를 포함하는 데�
 SELECT * FROM EMP WHERE NAME IS NULL;     --> NAME열 값이 존재하지 않는 데이터 출력
 SELECT * FROM EMP WHERE NAME IS NOT NULL; --> NAME열 값이 존재하는 데이터 출력
 ```
-___
-## 문자열 함수
-#### UPPER, LOWER, INITCAP, 대소문자
+
+#### 문자열 함수 1. UPPER, LOWER, INITCAP, 대소문자
 - UPPER(문자열): 괄호 안 문자 데이터 모두 대문자 변환
 - LOWER(문자열): 괄호 안 문자 데이터 모두 소문자 변환
 - INITCAP(문자열): 괄호 안 문자 데이터 중 첫 글자는 대문자, 나머지 문자 소문자 변환
@@ -47,7 +46,7 @@ SELECT UPPER(NAME), LOWER(NAME), INITCAP(NAME) FROM EMP;
 SELECT * FROM EMP WHERE UPPER(NAME) = UPPER('kimhyuK');
 ```    
 
-#### LENGTH, 문자열 길이
+#### 문자열 함수 2. LENGTH, 문자열 길이
 - 특정 문자열의 길이를 구할 때 사용
 ```SQL
 SELECT NAME FROM EMP WHERE LENGTH(NAME) >= 4;
