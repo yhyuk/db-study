@@ -1,4 +1,5 @@
 # ORACLE_KEYWORD Summary
+오라클 공부하면서 문법 정리겸, 깜박하고 잊을만한 내용 정리자료 입니다.
 
 ## SELECT : DB에 저장되어 있는 데이터 조회
 #### DISTINCT 
