@@ -79,7 +79,51 @@ FROM DUAL;
 
 #### 5. REPLACE, 특정문자를 다른문자로 바꾸기
 - 특정 문자열 데이터에 포함된 문자를 다른 문자로 대체할 경우에 사용
-**test
 ```SQL
 REPLACE([문자열 데이터 OR 열 이름(필수)], [찾는 문자(필수)], [대체할 문자(선택)]
 ``` 
+```SQL
+SELECT REPLACE('010-1234-5678', '-', ' ') AS RE1, --> 010 1234 5678
+       REPLACE('010-1234-5678', '-') AS RE2,      --> 01012345678
+       REPLACE('홍길동', '홍', '김') AS RE3       --> 김길동
+FROM DUAL;
+```
+
+#### 6. LPAD & RPAD, 데이터의 빈 공간 채우기
+- Left Padding, Right Padding
+- 데이터와 자릿수를 지정한 후 데이터 길이가 지정한 자릿수보다 작을 경우에 나머지 공간을 특정 문자로 채울때 사용
+- LPAD는 남은 빈 공간을 왼쪽으로, RPAD는 남은 빈 공간을 오른쪽으로 채운다.
+- 만약 빈 공간에 채울 문자를 지정하지 않으면 LPAD와 RPAD는 빈 공간의 자릿수 만큼 공백문자("")로 띄운다.
+```SQL
+LPAD([문자열 데이터 또는 열이름(필수)], [데이터의 자리수(필수)], [빈 공간에 채울 문자(선택)])
+RPAD([문자열 데이터 또는 열이름(필수)], [데이터의 자리수(필수)], [빈 공간에 채울 문자(선택)])
+```
+```SQL
+SELECT LPAD('TEST', 10, '#') AS LPAD1,  --> "######TEST"
+       RPAD('TEST', 10, '*') AS RPAD1,  --> "TEST******"
+       LPAD('TEST', 10) AS LPAD2,       --> "      TEST"
+       RPAD('TEST', 10) AS RPAD2        --> "TEST      "
+FROM DUAL; 
+```
+
+#### 7. CONCAT, 두 문자열 데이터 합치기
+- 두 개의 문자열 데이터를 하나의 데이터로 연결해주는 역할을 한다.
+- 두 개의 입력 데이터를 지정을 하고 열이나 문자열 데이터 모두 지정할 수 있다.
+```SQL
+SELECT CONCAT('HELLO', 'WORLD!'),              --> HELLOWORLD!
+       CONCAT('HELLO', CONCAT(', ', 'WORLD!')) --> HELLO, WORLD!
+FROM DUAL;       
+```
+
+#### 8. TRIM & LTRIM & RTRIM, 특정 문자 지우기(공백제거)
+- 문자열 데이터 내에서 특정 문자를 지우기 위해 사용한다.
+- 삭제할 문자가 생략될 경우에 기본적으로 공백을 제거한다.
+```SQL
+TRIM([삭제 옵션(선택)] [삭제할 문자(선택)] FROM [원본 문자열 데이터(필수)])
+```
+```SQL
+SELECT TRIM('  HELLO, WORLD!  ') AS TRIM1,  --> "HELLO, WORLD!"
+       LTRIM('  HELLO, WORLD!  ') AS TRIM2, --> "HELLO, WORLD!  "
+       RTRIM('  HELLO, WORLD!  ') AS TRIM3  --> "  HELLO, WORLD!"
+FROM DUAL;
+```
