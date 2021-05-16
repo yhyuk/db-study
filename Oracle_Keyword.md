@@ -8,7 +8,7 @@
 #### ORDER BY 
 - 출력데이터를 원하는 순서로 출력
 - ASC, DESC
-- 
+
 ## WHERE : 필요한 데이터만 출력
 #### 기본 연산자
 - 산술 연산자: +, -, *, /
@@ -32,7 +32,7 @@ SELECT * FROM EMP WHERE NAME LIKE '%LA%'; --> 대문자 LA를 포함하는 데�
 #### IS NULL 연산자
 - *NULL: '비어있는 상태'(숫자0과 다르다.)
 ```sql
-SELECT * FROM EMP WHERE NAME IS NULL; --> NAME열 값이 존재하지 않는 데이터 출력
+SELECT * FROM EMP WHERE NAME IS NULL;     --> NAME열 값이 존재하지 않는 데이터 출력
 SELECT * FROM EMP WHERE NAME IS NOT NULL; --> NAME열 값이 존재하는 데이터 출력
 ```
 
