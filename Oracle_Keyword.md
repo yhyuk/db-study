@@ -1,6 +1,6 @@
 # ORACLE_KEYWORD Summary
 오라클 공부하면서 문법 정리겸, 깜박하고 잊을만한 내용 정리자료 입니다.
-
+___
 ## SELECT : DB에 저장되어 있는 데이터 조회
 #### DISTINCT 
 - 열 중복제거
@@ -9,7 +9,7 @@
 #### ORDER BY 
 - 출력데이터를 원하는 순서로 출력
 - ASC, DESC
-
+___
 ## WHERE : 필요한 데이터만 출력
 #### 기본 연산자
 - 산술 연산자: +, -, *, /
@@ -36,7 +36,7 @@ SELECT * FROM EMP WHERE NAME LIKE '%LA%'; --> 대문자 LA를 포함하는 데�
 SELECT * FROM EMP WHERE NAME IS NULL;     --> NAME열 값이 존재하지 않는 데이터 출력
 SELECT * FROM EMP WHERE NAME IS NOT NULL; --> NAME열 값이 존재하는 데이터 출력
 ```
-
+___
 ## 문자열 함수
 #### UPPER, LOWER, INITCAP, 대소문자
 - UPPER(문자열): 괄호 안 문자 데이터 모두 대문자 변환
