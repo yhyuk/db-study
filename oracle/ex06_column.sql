@@ -77,7 +77,7 @@ FROM TBLCOMEDIAN;
 
 --예제1
 SELECT 
-    LAST || FIRST AS NAME,
+    --LAST || FIRST AS NAME,
     CASE
         WHEN GENDER = 'm' THEN '남자'
         WHEN GENDER = 'f' THEN '여자'
@@ -160,3 +160,22 @@ FROM TBLINSA;
 -- 정챌1: 직위별 수당 + A > 부장(X2), 과장(X1.7), 대리(X1.5), 사원(X1.3)
 -- 정책2: 직위별 수당 + A > 부장,과장(X2), 대리,사원(X1.5)
 
+--정책1: 직위별 수당 + A > 부장(X2), 과장(X1.7), 대리(X1.5), 사원(X1.3)
+SELECT 
+    NAME, BUSEO, JIKWI,
+    CASE
+        WHEN JIKWI = '부장' THEN SUDANG * 2
+        WHEN JIKWI = '과장' THEN SUDANG * 1.7
+        WHEN JIKWI = '대리' THEN SUDANG * 1.5
+        WHEN JIKWI = '사원' THEN SUDANG * 1.3
+    END AS 추가수당
+FROM TBLINSA;
+
+-- 정책2: 직위별 수당 + A > 부장,과장(X2), 대리,사원(X1.5)
+SELECT
+    NAME, BUSEO, JIKWI,
+    CASE
+        WHEN JIKWI IN ('부장', '과장') THEN SUDANG * 2
+        WHEN JIKWI IN ('대리', '사원') THEN SUDANG * 1.5
+    END AS 추가수당
+FROM TBLINSA;
