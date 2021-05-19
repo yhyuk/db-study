@@ -76,3 +76,11 @@ INSERT INTO TBLMEMO (SEQ, MEMO, REGDATE) VALUES (1, '메모입니다', SYSDATE);
 - 원인: NOT NULL로 지정된 컬럼리스트에 NULL값을 넣었으며, 생략했다.
 - 방법: NAME 컬럼리스트를 제약사항을 변경하거나 NULL값이 아닌 데이터 값을 넣는다.
 
+## 기본키, PRIMARY KEY 에러
+```SQL
+ORA-00001: unique constraint (HR.SYS_C007081) violated
+INSERT INTO TBLMEMO (SEQ, NAME, MEMO, REGDATE) VALUES (1, '홍길동', '메모입니다', SYSDATE);
+INSERT INTO TBLMEMO (SEQ, NAME, MEMO, REGDATE) VALUES (1, '아무개', '테스트용', SYSDATE);
+```
+- 원인: PRIMARY KEY(PK)로 지정된 컬럼에 중복값을 넣었다.
+- 방법: SEQ 컬럼 제약사항을 변경하거나, 중복되지 않은 유일한 데이터 값을 넣는다.
