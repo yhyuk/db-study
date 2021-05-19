@@ -58,3 +58,21 @@ SELECT SUM(FIRST) FROM TBLCOMEDIAN;
 ```
 - 원인: SUM은 숫자형만 와야하는데 다른 자료형이 들어옴         
 - 방법: 숫자형 데이터를 작성한다.
+
+## 날짜 상수표기 에러
+```SQL
+ORA-01861: literal does not match format string
+WHERE IBSADATE BETWEEN '2010-01-01 00:00:00' AND '2010-12-31 23:59:59';
+```
+- 원인: 날짜형은 상수가 아니다.
+- 방법: 날짜비교는 TO_CHAR 함수 OR TO_DATE 함수를 이용하면 된다.
+
+## NOT NULL 에러
+```SQL
+ORA-01400: cannot insert NULL into ("HR"."TBLMEMO"."NAME")
+INSERT INTO TBLMEMO (SEQ, NAME, MEMO, REGDATE) VALUES (1, NULL, '메모입니다', SYSDATE);
+INSERT INTO TBLMEMO (SEQ, MEMO, REGDATE) VALUES (1, '메모입니다', SYSDATE);
+```
+- 원인: NOT NULL로 지정된 컬럼리스트에 NULL값을 넣었으며, 생략했다.
+- 방법: NAME 컬럼리스트를 제약사항을 변경하거나 NULL값이 아닌 데이터 값을 넣는다.
+
