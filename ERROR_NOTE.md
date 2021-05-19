@@ -59,7 +59,8 @@ SELECT SUM(FIRST) FROM TBLCOMEDIAN;
 - 원인: SUM은 숫자형만 와야하는데 다른 자료형이 들어옴         
 - 방법: 숫자형 데이터를 작성한다.
 
-## 날짜 상수표기 에러
+
+## 날짜 상수 표기 에러
 ```SQL
 ORA-01861: literal does not match format string
 WHERE IBSADATE BETWEEN '2010-01-01 00:00:00' AND '2010-12-31 23:59:59';
@@ -84,3 +85,32 @@ INSERT INTO TBLMEMO (SEQ, NAME, MEMO, REGDATE) VALUES (1, '아무개', '테스�
 ```
 - 원인: PRIMARY KEY(PK)로 지정된 컬럼에 중복값을 넣었다.
 - 방법: SEQ 컬럼 제약사항을 변경하거나, 중복되지 않은 유일한 데이터 값을 넣는다.
+
+## 컬럼리스트와 값리스트 에러1
+```SQL
+ORA-00947: not enough values
+INSERT INTO tblMemo (SEQ, NAME, MEMO, REGDATE) VALUES (seqMemo.NEXTVAL, '홍길동', SYSDATE);
+```
+- 원인: 컬럼 리스트가 4개라면, 값 리스트도 4개여야 한다.
+- 방법: 값 리스트에 없는 것을 컬럼 리스트에서도 빼거나, 값 리스트에 추가해야한다.
+
+## 컬럼리스트와 값리스트 에러2
+```SQL
+ORA-00913: too many values
+INSERT INTO tblMemo (SEQ, NAME, REGDATE) VALUES (seqMemo.NEXTVAL, '홍길동', '메모입니다', SYSDATE);
+```
+- 원인: 컬럼 리스트가 4개라면, 값 리스트도 4개여야 한다.
+- 방법: 컬럼 리스트에 없는것을 값 리스트에서 빼거나, 컬럼 리스트에 추가해야한다.
+
+## GROUP BY 에러
+```SQL
+ORA-00979: not a GROUP BY expression
+SELECT 
+    JIKWI,
+    NAME,
+    COUNT(*)
+FROM TBLINSA
+    GROUP BY JIKWI;
+```
+- 원인: 그룹으로 묶은 곳에 개인(개별)데이터가 들어왔다.
+- 방법: 개별 데이터인 NAME컬럼을 지운다.
