@@ -152,7 +152,6 @@ FROM TBLMEN
     WHERE COUPLE IS NOT NULL; -- 커플
 
 
-
 SELECT * FROM EMPLOYEES; --직원
 SELECT * FROM DEPARTMENTS; --부서
 
@@ -199,21 +198,22 @@ FROM EMPLOYEES
     WHERE DEPARTMENT_ID IN (SELECT DISTINCT DEPARTMENT_ID FROM EMPLOYEES WHERE SALARY >= 12000);
 
 --40. employees, departments. first_name이 'Jonathon'인 직원과 같은 부서에 근무하는 직원들 정보를 가져오시오.
-
 SELECT 
     *
 FROM EMPLOYEES
     WHERE DEPARTMENT_ID = (SELECT DEPARTMENT_ID FROM EMPLOYEES WHERE FIRST_NAME = 'Jonathon');
 
 --61. employees. 2001~2003년사이에 입사한 사원의 이름(first_name), 입사일(hire_date), 관리자사번 (employee_id), 관리자 이름(fist_name)을 가져오시오. 단, 관리자가 없는 사원정보도 결과에 포함시켜 가져오시오.
-
-SELECT * FROM EMPLOYEES;
-
-
-
-
-
-
-
+SELECT 
+    FIRST_NAME,
+    HIRE_DATE,
+    EMPLOYEE_ID,
+    (SELECT FIRST_NAME FROM HR.EMPLOYEES E2 WHERE E.MANAGER_ID = E2.EMPLOYEE_ID)
+FROM HR.EMPLOYEES E
+    WHERE SUBSTR(HIRE_DATE, 1, 2) BETWEEN 1 AND 3;
 
 --63. employees. last_name 에 'u' 가 포함되는 사원들과 동일 부서에 근무하는 사원들의 사번 및 last_name을 가져오시오.
+SELECT 
+    EMPLOYEE_ID, LAST_NAME
+FROM EMPLOYEES 
+    WHERE DEPARTMENT_ID IN (SELECT DEPARTMENT_ID FROM EMPLOYEES WHERE LAST_NAME LIKE '%U%' OR LAST_NAME LIKE '%u%');
