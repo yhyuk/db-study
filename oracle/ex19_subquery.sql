@@ -164,9 +164,8 @@ SELECT
 FROM EMPLOYEES;
 
 
--- 서브 쿼리
+-- QUESTION.SUB QUERY
 --10. tblAddressBook. 가장 많은 사람들이 가지고 있는 직업은 주로 어느 지역 태생(hometown)인가?
-
 SELECT
     DISTINCT HOMETOWN
 FROM TBLADDRESSBOOK
@@ -174,20 +173,72 @@ FROM TBLADDRESSBOOK
                 (SELECT MAX(COUNT(*)) FROM TBLADDRESSBOOK GROUP BY JOB));
 
 --13. tblAddressBook. 이메일 도메인들 중 평균 아이디 길이가 가장 긴 이메일 사이트의 도메인은 무엇인가?
+SELECT
+    SUBSTR(EMAIL, INSTR(EMAIL, '@')+1),
+    AVG(LENGTH(SUBSTR(EMAIL, 1, INSTR(EMAIL, '@')-1)))
+FROM tblAddressBook
+    GROUP BY SUBSTR(EMAIL, INSTR(EMAIL, '@')+1)
+        HAVING AVG(LENGTH(SUBSTR(EMAIL, 1, INSTR(EMAIL, '@')-1)))
+                = (SELECT MAX(AVG(LENGTH(SUBSTR(EMAIL, 1, INSTR(EMAIL, '@')-1)))) 
+                    FROM tblAddressBook GROUP BY SUBSTR(EMAIL, INSTR(EMAIL, '@')+1));
 
 --14. tblAddressBook. 평균 나이가 가장 많은 출신(hometown)들이 가지고 있는 직업 중 가장 많은 직업은?
-
+SELECT
+    JOB
+FROM tblAddressBook
+    WHERE HOMETOWN = (SELECT HOMETOWN FROM tblAddressBook GROUP BY HOMETOWN 
+                        HAVING AVG(AGE) = (SELECT MAX(AVG(AGE)) FROM tblAddressBook GROUP BY HOMETOWN))
+        GROUP BY JOB
+            HAVING COUNT(*) = (SELECT MAX(COUNT(*)) FROM tblAddressBook 
+                                WHERE HOMETOWN = (SELECT HOMETOWN FROM tblAddressBook GROUP BY HOMETOWN 
+                                    HAVING AVG(AGE) = (SELECT MAX(AVG(AGE)) FROM tblAddressBook GROUP BY HOMETOWN)) GROUP BY JOB);
 --16. tblAddressBook. 남자 평균 나이보다 나이가 많은 서울 태생 + 직업을 가지고 있는 사람들을 가져오시오.
+SELECT
+    *
+FROM TBLADDRESSBOOK
+    WHERE AGE > (SELECT AVG(AGE) FROM TBLADDRESSBOOK WHERE GENDER = 'm') AND 
+        HOMETOWN = '서울' AND JOB NOT IN ('취업준비생', '백수');
 
 --19. tblAddressBook. 가장 나이가 많으면서 가장 몸무게가 많이 나가는 사람과 같은 직업을 가지는 사람들을 가져오시오.
-
+SELECT 
+    *
+FROM TBLADDRESSBOOK
+    WHERE JOB = (SELECT JOB FROM TBLADDRESSBOOK 
+        WHERE   AGE = (SELECT MAX(AGE) FROM TBLADDRESSBOOK) AND 
+                WEIGHT = (SELECT MAX(WEIGHT) FROM TBLADDRESSBOOK));
+    
 --20. tblAddressBook. '건물주'와 '건물주자제분'들의 거주지가 서울과 지방의 비율이 어떻게 되느냐?
+SELECT
+    ROUND((COUNT(CASE
+        WHEN SUBSTR(ADDRESS, 1, 2) = '서울' THEN 1
+    END) / COUNT(*) * 100), 1) AS 서울비율,
+    ROUND((COUNT(CASE
+        WHEN SUBSTR(ADDRESS, 1, 2) <> '서울' THEN 1
+    END) / COUNT(*) * 100), 1) AS 지방비율
+FROM TBLADDRESSBOOK
+    WHERE JOB IN ('건물주', '건물주자제분');
 
 --21. tblAddressBook.  동명이인이 여러명 있습니다. 이 중 가장 인원수가 많은 동명이인(모든 이도윤)의 명단을 가져오시오.
-
+SELECT
+    *
+FROM TBLADDRESSBOOK
+    WHERE NAME = (SELECT NAME FROM TBLADDRESSBOOK GROUP BY NAME HAVING COUNT(*)
+                  = (SELECT MAX(COUNT(*)) FROM TBLADDRESSBOOK GROUP BY NAME));
 --22. tblAddressBook. 가장 사람이 많은 직업의(332명) 세대별 비율을 구하시오.
 --    [10대]       [20대]       [30대]       [40대]
 --    8.7%        30.7%        28.3%        32.2%
+SELECT 
+    SUBSTR(AGE, 1, 1) || '0대',
+    ROUND(COUNT(*) / (SELECT COUNT(*) FROM tblAddressBook WHERE JOB = 
+                            (SELECT JOB FROM tblAddressBook GROUP BY JOB HAVING COUNT(*) =
+                            (SELECT MAX(COUNT(*)) FROM tblAddressBook GROUP BY JOB))) * 100, 1) AS 비율
+FROM tblAddressBook
+    WHERE JOB = (SELECT JOB FROM tblAddressBook GROUP BY JOB HAVING COUNT(*)
+                = (SELECT MAX(COUNT(*)) FROM tblAddressBook GROUP BY JOB))
+        GROUP BY SUBSTR(AGE, 1, 1)
+            ORDER BY SUBSTR(AGE, 1, 1);
+
+
 
 --38. employees. 급여를 12000 이상 받는 사원과 같은 부서에서 근무하는 사원들의 이름, 급여, 부서번호를 가져오시오.
 SELECT 

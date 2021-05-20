@@ -355,19 +355,82 @@ FROM TBLADDRESSBOOK
         GROUP BY SUBSTR(ADDRESS, 1, INSTR(ADDRESS, ' ') - 1);
 
 --8. tblAddressBook. 현재 주소(address)와 고향(hometown)이 같은 지역인 사람들을 가져오시오.
-
+SELECT ADDRESS FROM tblAddressBook 
+    WHERE HOMETOWN = SUBSTR(ADDRESS, 1,  2) 
+        GROUP BY ADDRESS;
+        
 --9. tblAddressBook. 역삼로에 사는 사람 중 gmail을 사용하는 사람들을 가져오시오.
+SELECT 
+    *
+FROM tblAddressBook
+    WHERE EMAIL LIKE '%gmail%' AND ADDRESS LIKE '%역삼로%';
 
 --11. tblAddressBook. 전화번호에 '123'이 들어간 사람 중 여학생만을 가져오시오.
+SELECT
+    *
+FROM tblAddressBook
+    WHERE TEL LIKE '%123%' AND GENDER = 'f';
 
 --12. tblAddressBook. 관리자의 실수로 몇몇 사람들의 이메일 주소가 중복되었다. 중복된 이메일 주소만 가져오시오.
+SELECT
+    EMAIL
+FROM tblAddressBook
+    GROUP BY EMAIL
+        HAVING COUNT(*) > 1;
 
 --15. tblAddressBook. 성씨별 인원수가 100명 이상 되는 성씨들을 가져오시오.
+SELECT
+    SUBSTR(NAME, 1, 1)
+FROM tblAddressBook
+    GROUP BY SUBSTR(NAME, 1, 1)
+        HAVING COUNT(*) >= 100;
 
 --17. tblAddressBook. 이메일이 스네이크 명명법으로 만들어진 사람들 중에서 여자이며, 20대이며, 키가 150~160cm 사이며, 고향이 서울 또는 인천인 사람들만 가져오시오.
+SELECT
+    *
+FROM tblAddressBook
+    WHERE INSTR(EMAIL, '_') <> 0 AND
+    GENDER = 'f' AND 
+    (AGE BETWEEN 20 AND 29) AND
+    (HEIGHT BETWEEN 150 AND 160) AND
+    HOMETOWN IN ('서울', '인천');
 
 --18. tblAddressBook. gmail.com을 사용하는 사람들의 성별 > 세대별(10,20,30,40대) 인원수를 가져오시오.
+SELECT
+    TRUNC(AGE, -1) AS "세대",
+    COUNT(*) AS "세대별 인원수",
+    COUNT(CASE
+        WHEN GENDER = 'f' THEN 1
+    END) AS "여자",
+    COUNT(CASE
+        WHEN GENDER = 'm' THEN 1
+    END) AS "남자"
+FROM tblAddressBook
+    WHERE SUBSTR(EMAIL, INSTR(EMAIL, '@')+1) = 'gmail.com'
+        GROUP BY TRUNC(AGE, -1);
 
 --53. employees. 총 사원 수 및 2003, 2004, 2005, 2006 년도 별 고용된 사원들의 총 수를 가져오시오.
+SELECT
+    TO_CHAR(HIRE_DATE, 'YYYY') || '년',
+    COUNT(*) || '명'
+FROM EMPLOYEES
+        GROUP BY TO_CHAR(HIRE_DATE, 'YYYY')
+            ORDER BY 1;
 
---55. employees. 직업이 'AD_PRESS' 인 사람은 A 등급을, 'ST_MAN' 인 사람은 B 등급을, 'IT_PROG' 인 사람은 C 등급을, 'SA_REP' 인 사람은 D 등급을, 'ST_CLERK' 인 사람은 E 등급을 기타는 0 을 부여하여 가져오시오.
+--55. employees. 직업이 'AD_PRESS' 인 사람은 A 등급을, 
+--'ST_MAN' 인 사람은 B 등급을, 
+--'IT_PROG' 인 사람은 C 등급을, 
+--'SA_REP' 인 사람은 D 등급을, 
+--'ST_CLERK' 인 사람은 E 등급을 
+--기타는 0 을 부여하여 가져오시오.
+SELECT
+    EMPLOYEES.*,
+    CASE
+        WHEN JOB_ID = 'AD_PRES' THEN 'A'
+        WHEN JOB_ID = 'ST_MAN' THEN 'B'
+        WHEN JOB_ID = 'IT_PROG' THEN 'C'
+        WHEN JOB_ID = 'ST_REP' THEN 'D'
+        WHEN JOB_ID = 'ST_CLERK' THEN 'E'
+        ELSE '0'
+    END
+FROM EMPLOYEES;
