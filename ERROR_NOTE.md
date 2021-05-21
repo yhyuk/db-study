@@ -114,3 +114,32 @@ FROM TBLINSA
 ```
 - 원인: 그룹으로 묶은 곳에 개인(개별)데이터가 들어왔다.
 - 방법: 개별 데이터인 NAME컬럼을 지운다.
+
+## FK(Foreign Key) 참조키 에러1
+```SQL
+ORA-02291: integrity constraint (HR.SYS_C007178) violated - parent key not found
+INSERT INTO tblProject (SEQ, PROJECT, STAFF_SEQ) VALUES (6, '고객유치', 5);  
+```
+- 원인:
+- 방법:
+참조할 번호가 없다
+
+## FK(Foreign Key) 참조키 에러2
+```SQL
+ORA-02292: integrity constraint (HR.SYS_C007178) violated - child record found
+DELETE FROM tblStaff WHERE SEQ = 1;
+```
+참조할 번호가 없다
+- 원인:
+- 방법:
+
+## 두개의 테이블에서의 동일 컬럼명 에러
+```SQL
+ORA-00918: column ambiguously defined, 열의 정의가 애매합니다.
+SELECT SEQ FROM tblCustomer    
+    INNER JOIN tblSales
+        ON tblCustomer.SEQ = tblSales.CSEQ;
+```
+조인을 할 때 자주 발생하는 현상
+- 원인:
+- 방법:      
