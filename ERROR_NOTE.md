@@ -59,7 +59,6 @@ SELECT SUM(FIRST) FROM TBLCOMEDIAN;
 - 원인: SUM은 숫자형만 와야하는데 다른 자료형이 들어옴         
 - 방법: 숫자형 데이터를 작성한다.
 
-
 ## 날짜 상수 표기 에러
 ```SQL
 ORA-01861: literal does not match format string
@@ -120,18 +119,16 @@ FROM TBLINSA
 ORA-02291: integrity constraint (HR.SYS_C007178) violated - parent key not found
 INSERT INTO tblProject (SEQ, PROJECT, STAFF_SEQ) VALUES (6, '고객유치', 5);  
 ```
-- 원인:
-- 방법:
-참조할 번호가 없다
+- 원인: 참조할 번호가 없다.
+- 방법: 데이터 추가 시 참조 번호를 다시 확인하여 추가한다.
 
 ## FK(Foreign Key) 참조키 에러2
 ```SQL
 ORA-02292: integrity constraint (HR.SYS_C007178) violated - child record found
 DELETE FROM tblStaff WHERE SEQ = 1;
 ```
-참조할 번호가 없다
-- 원인:
-- 방법:
+- 원인: 참조할 번호가 없어지는건 불가능하다.
+- 방법: 현재 테이블에서 PK값 SEQ = 1이 참조하고 있는 값이 있으므로, 삭제 불가
 
 ## 두개의 테이블에서의 동일 컬럼명 에러
 ```SQL
@@ -140,6 +137,14 @@ SELECT SEQ FROM tblCustomer
     INNER JOIN tblSales
         ON tblCustomer.SEQ = tblSales.CSEQ;
 ```
-조인을 할 때 자주 발생하는 현상
-- 원인:
-- 방법:      
+- 원인: 두 테이블의 각 컬럼명에서 동일 컬럼명이 있다.
+- 방법: 식별자를 해당 컬럼명 앞에 붙인다. tblCustomer.SEQ, tblSales.SEQ
+
+## 테이블 생성 시 NOT NULL 에러
+```SQL
+ORA-01758: table must be empty to add mandatory (NOT NULL) column
+ALTER TABLE TBLEDIT
+    ADD (DESCRIPTION VARCHAR2(100) NOT NULL);
+```
+- 원인: NOT NULL은 데이터가 존재해야한다.
+- 방법: 새로운 테이블 NOT NULL 생성 시 DEFAULT 기본값을 넣어준다. 
