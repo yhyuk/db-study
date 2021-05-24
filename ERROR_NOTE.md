@@ -130,7 +130,7 @@ DELETE FROM tblStaff WHERE SEQ = 1;
 - 원인: 참조할 번호가 없어지는건 불가능하다.
 - 방법: 현재 테이블에서 PK값 SEQ = 1이 참조하고 있는 값이 있으므로, 삭제 불가
 
-## 두개의 테이블에서의 동일 컬럼명 에러
+## 두 테이블의 동일 컬럼명 에러
 ```SQL
 ORA-00918: column ambiguously defined, 열의 정의가 애매합니다.
 SELECT SEQ FROM tblCustomer    
@@ -140,7 +140,7 @@ SELECT SEQ FROM tblCustomer
 - 원인: 두 테이블의 각 컬럼명에서 동일 컬럼명이 있다.
 - 방법: 식별자를 해당 컬럼명 앞에 붙인다. tblCustomer.SEQ, tblSales.SEQ
 
-## 테이블 생성 시 NOT NULL 에러
+## 새로운 테이블 생성 시 NOT NULL 에러
 ```SQL
 ORA-01758: table must be empty to add mandatory (NOT NULL) column
 ALTER TABLE TBLEDIT
