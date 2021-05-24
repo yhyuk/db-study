@@ -114,11 +114,14 @@ FROM TBLVIDEO V
                         ON V.GENRE = G.SEQ;
                         
 
--- 33. employees, departments. 사원들의 이름, 부서번호, 부서명을 가져오시오.
+-- 33. employees, departments. 
+-- 사원들의 이름, 부서번호, 부서명을 가져오시오.
 
--- 34. employees, jobs. 사원들의 정보와 직위명을 가져오시오.
+-- 34. employees, jobs. 
+-- 사원들의 정보와 직위명을 가져오시오.
 
--- 35. employees, jobs. 직무(job_id)별 최고급여(max_salary) 받는 사원 정보를 가져오시오.
+-- 35. employees, jobs. 
+-- 직무(job_id)별 최고급여(max_salary) 받는 사원 정보를 가져오시오.
 
 -- 36. departments, locations. 모든 부서와 각 부서가 위치하고 있는 도시의 이름을 가져오시오.
 
@@ -152,9 +155,13 @@ FROM TBLVIDEO V
 
 -- 51. employees. 매니저로 근무하는 사원이 총 몇명인가?
 
--- 52. employees. 자신의 매니저보다 연봉(salary)를 많이 받는 사원들의 성(last_name)과 연봉(salary)를 가져오시오.
+-- 52. employees. 자신의 매니저보다 
+-- 연봉(salary)를 많이 받는 사원들의 
+-- 성(last_name)과 연봉(salary)를 가져오시오.
 
--- 53. employees. 총 사원 수 및 2003, 2004, 2005, 2006 년도 별 고용된 사원들의 총 수를 가져오시오.
+-- 53. employees. 
+-- 총 사원 수 및 2003, 2004, 2005, 2006 년도 별 
+-- 고용된 사원들의 총 수를 가져오시오.
 
 
 
@@ -226,8 +233,8 @@ FROM EMPLOYEES E
                         ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
                 GROUP BY E.DEPARTMENT_ID, D.DEPARTMENT_NAME) ED 
         ON E.DEPARTMENT_ID = ED.DEPARTMENT_ID
-            WHERE E.SALARY = ED.MS
-                ORDER BY ED.DEPARTMENT_NAME ASC, E.LAST_NAME ASC;
+    WHERE E.SALARY = ED.MS
+        ORDER BY ED.DEPARTMENT_NAME ASC, E.LAST_NAME ASC;
 
 
 -- 58. employees, departments, locations. 
@@ -249,11 +256,11 @@ SELECT
 FROM EMPLOYEES E 
     INNER JOIN DEPARTMENTS D
         ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
-            INNER JOIN LOCATIONS L
-                ON D.LOCATION_ID = L.LOCATION_ID AND L.CITY = 'Seattle'
-                    LEFT OUTER JOIN EMPLOYEES M
-                        ON E.MANAGER_ID = M.EMPLOYEE_ID
-                            ORDER BY E.LAST_NAME;
+    INNER JOIN LOCATIONS L
+        ON D.LOCATION_ID = L.LOCATION_ID AND L.CITY = 'Seattle'
+    LEFT OUTER JOIN EMPLOYEES M
+        ON E.MANAGER_ID = M.EMPLOYEE_ID
+    ORDER BY E.LAST_NAME;
  
 -- 59. employees, jobs. 
 -- 각 업무(job) 별로 연봉(salary)의 총합을 구하고자 한다. 
@@ -283,10 +290,10 @@ SELECT
 FROM EMPLOYEES E
     INNER JOIN DEPARTMENTS D
         ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
-            INNER JOIN LOCATIONS L
-                ON D.LOCATION_ID = L.LOCATION_ID AND L.CITY = 'Seattle'
-                    INNER JOIN JOBS J
-                        ON E.JOB_ID = J.JOB_ID
+    INNER JOIN LOCATIONS L
+        ON D.LOCATION_ID = L.LOCATION_ID AND L.CITY = 'Seattle'
+    INNER JOIN JOBS J
+        ON E.JOB_ID = J.JOB_ID
                         --WHERE L.CITY = 'Seattle'
 ORDER BY E.EMPLOYEE_ID ASC;
 
@@ -301,7 +308,7 @@ SELECT
 FROM EMPLOYEES E
     LEFT OUTER JOIN EMPLOYEES M
         ON E.MANAGER_ID = M.EMPLOYEE_ID 
-            WHERE TO_CHAR(E.HIRE_DATE, 'YYYY') BETWEEN 2001 AND 2003;
+    WHERE TO_CHAR(E.HIRE_DATE, 'YYYY') BETWEEN 2001 AND 2003;
             --where e1.hire_date between '2001-01-01' and '2003-12-31'
 -- 62. employees, departments. 
 -- ‘Sales’ 부서에 속한 사원의 이름(first_name), 급여(salary), 부서이름(department_name)을 가져오시오. 
@@ -324,14 +331,122 @@ SELECT
 FROM EMPLOYEES E
     WHERE DEPARTMENT_ID IN (SELECT DISTINCT DEPARTMENT_ID FROM EMPLOYEES WHERE LAST_NAME LIKE '%u%');
 
--- 64. employees, departments. 부서별 사원들의 최대, 최소, 평균급여를 조회하되, 평균급여가 ‘IT’ 부서의 평균급여보다 많고, ‘Sales’ 부서의 평균보다 적은 부서 정보만 가져오시오. 
+-- 64. employees, departments. 부서별 사원들의 
+-- 최대, 최소, 평균급여를 조회하되, 
+-- 평균급여가 ‘IT’ 부서의 평균급여보다 많고, ‘Sales’ 부서의 평균보다 적은 부서 정보만 가져오시오. 
 
--- 65. employees, departments. 각 부서별로 사원이 한명만 있는 부서만 가져오시오. 단, 사원이 없는 부서에 대해서는 ‘신생부서’라는 문자열을 가져오고,  결과는 부서명이 내림차순으로 정렬되게 하시오.
+SELECT 
+    D.DEPARTMENT_NAME, MAX(E.SALARY), MIN(E.SALARY), ROUND(AVG(E.SALARY))
+FROM EMPLOYEES E
+    INNER JOIN DEPARTMENTS D
+        ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+    GROUP BY D.DEPARTMENT_NAME
+        HAVING  ROUND(AVG(E.SALARY)) > (
+                                            SELECT 
+                                                ROUND(AVG(E.SALARY))
+                                            FROM EMPLOYEES E, DEPARTMENTS D
+                                                WHERE D.DEPARTMENT_NAME = 'IT' AND D.DEPARTMENT_ID = E.DEPARTMENT_ID)
+            AND  ROUND(AVG(E.SALARY)) < (
+                                           SELECT 
+                                                  ROUND(AVG(E.SALARY))
+                                           FROM EMPLOYEES E, DEPARTMENTS D
+                                               WHERE D.DEPARTMENT_NAME = 'Sales' AND D.DEPARTMENT_ID = E.DEPARTMENT_ID);
 
--- 66. employees, departments. 부서별 입사월별 사원수를 가져오시오. 단, 사원수가 5명 이상인 부서만 가져오고,  결과는 부서이름 순으로 하시오.
+-- 65. employees, departments. 각 부서별로 
+-- 사원이 한명만 있는 부서만 가져오시오. 
+-- 단, 사원이 없는 부서에 대해서는 ‘신생부서’라는 문자열을 가져오고,  
+-- 결과는 부서명이 내림차순으로 정렬되게 하시오.
+SELECT
+    CASE
+        WHEN COUNT(E.EMPLOYEE_ID) = 1 THEN D.DEPARTMENT_NAME
+        WHEN COUNT(E.EMPLOYEE_ID) = 0 THEN '신생부서'
+    END AS "부서명", 
+    COUNT(E.EMPLOYEE_ID)
+FROM DEPARTMENTS D
+    LEFT OUTER JOIN EMPLOYEES E
+        ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+    GROUP BY D.DEPARTMENT_NAME
+        HAVING COUNT(*) = 1 OR COUNT(*) = 0
+    ORDER BY D.DEPARTMENT_NAME DESC;
+--10	1
+--40	1
+--70	1
 
--- 67. employees, departments, locations, countries. 국가(country_name) 별 도시(city)별 사원수를 가져오시오.  부서정보가 없는 사원은 국가명과 도시명 대신에 ‘부서없음’을 넣어서 가져오시오.
+-- 66. employees, departments. 부서별, 입사월별 사원수를 가져오시오. 
+-- 단, 사원수가 5명 이상인 부서만 가져오고,  
+-- 결과는 부서이름 순으로 하시오.
+SELECT * FROM EMPLOYEES;
+SELECT * FROM DEPARTMENTS;
+SELECT 
+    D.DEPARTMENT_NAME "부서명",
+    TO_CHAR(HIRE_DATE, 'MON') "입사월",
+    COUNT(*) AS "사원수"
+FROM DEPARTMENTS D
+    LEFT OUTER JOIN EMPLOYEES E
+        ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+    GROUP BY D.DEPARTMENT_NAME, TO_CHAR(HIRE_DATE, 'MON')
+        HAVING COUNT(*) >= 5
+    ORDER BY D.DEPARTMENT_NAME ASC;
+    
+-- 67. employees, departments, locations, countries. 
+-- 국가(country_name) 별 도시(city)별 사원수를 가져오시오.  
+-- 부서정보가 없는 사원은 국가명과 도시명 대신에 ‘부서없음’을 넣어서 가져오시오.
+SELECT * FROM EMPLOYEES;
+SELECT * FROM DEPARTMENTS;
+SELECT * FROM LOCATIONS;
+SELECT * FROM COUNTRIES;
 
--- 68. employees, departments. 각 부서별 최대 급여자의 아이디(employee_id), 이름(first_name), 급여(salary)를 가져오시오.
+SELECT
+    CASE
+        WHEN C.COUNTRY_NAME IS NULL THEN '부서없음'
+        WHEN C.COUNTRY_NAME IS NOT NULL THEN C.COUNTRY_NAME 
+    END AS "국가명",
+    CASE
+        WHEN L.CITY IS NULL THEN '부서없음'
+        WHEN L.CITY IS NOT NULL THEN L.CITY
+    END AS "도시명",
+    COUNT(*)
+FROM EMPLOYEES E
+    LEFT OUTER JOIN DEPARTMENTS D ON D.DEPARTMENT_ID = E.DEPARTMENT_ID
+    LEFT OUTER JOIN LOCATIONS L ON D.LOCATION_ID = L.LOCATION_ID
+    LEFT OUTER JOIN COUNTRIES C ON L.COUNTRY_ID = C.COUNTRY_ID
+    GROUP BY C.COUNTRY_NAME, L.CITY
+    ORDER BY COUNTRY_NAME ASC, CITY ASC;
 
--- 69. employees. 커미션(commission_pct)별 사원수를 가져오시오. 커미션은 0.2, 0.25는 모두 0.2로, 0.3, 0.35는 0.3 형태로 바꾸시오. 단, 커미션 정보가 없는 사원들도 있는 데 커미션이 없는 사원 그룹은 ‘커미션 없음’으로 바꿔 가져오시오.                        
+-- 68. employees, departments. 
+-- 각 부서별 최대 급여자의 
+-- 아이디(employee_id), 이름(first_name), 급여(salary)를 가져오시오.
+SELECT * FROM EMPLOYEES;
+SELECT * FROM DEPARTMENTS;
+
+SELECT 
+    E.EMPLOYEE_ID,
+    E.FIRST_NAME,
+    E.SALARY,
+    D.DEPARTMENT_NAME
+FROM EMPLOYEES E 
+    LEFT OUTER JOIN DEPARTMENTS D
+        ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+    WHERE (E.DEPARTMENT_ID, E.SALARY) IN 
+                                            (SELECT 
+                                                E.DEPARTMENT_ID,
+                                                MAX(E.SALARY) AS SALARY
+                                            FROM EMPLOYEES E
+                                            INNER JOIN DEPARTMENTS D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+                                            GROUP BY E.DEPARTMENT_ID)
+    ORDER BY E.EMPLOYEE_ID ASC;
+    
+-- 69. employees. 커미션(commission_pct)별 사원수를 가져오시오. 
+-- 커미션은 0.2, 0.25는 모두 0.2로, 
+-- 0.3, 0.35는 0.3 형태로 바꾸시오. 
+-- 단, 커미션 정보가 없는 사원들도 있는 데 커미션이 없는 사원 그룹은 
+-- ‘커미션 없음’으로 바꿔 가져오시오.  
+
+SELECT
+    CASE
+        WHEN '0' ||SUBSTR(COMMISSION_PCT, 1, 2) = '0' THEN '커미션 없음'
+        ELSE '0' ||SUBSTR(COMMISSION_PCT, 1, 2)
+    END AS "커미션명",
+    COUNT(*)
+FROM EMPLOYEES
+    GROUP BY SUBSTR(COMMISSION_PCT, 1, 2);
