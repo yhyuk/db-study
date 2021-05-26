@@ -157,5 +157,5 @@ BEGIN
 END;
 ```
 - 원인: PL/SQL 블럭내부에서는 SELECT의 결과를 반드시 변수에 저장해야 한다.
-- 방법: SELECT절을 SELECT 컬럼 INTO 변수명 으로 수정한다.
+- 방법: SELECT절을 SELECT 컬럼 INTO 변수명 으로 수정한다.    
    --> SELECT BUSEO INTO 변수명 FROM TBLINSA WHERE NAME = '홍길동';
