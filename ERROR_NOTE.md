@@ -148,3 +148,14 @@ ALTER TABLE TBLEDIT
 ```
 - 원인: NOT NULL은 데이터가 존재해야한다.
 - 방법: 새로운 테이블 NOT NULL 생성 시 DEFAULT 기본값을 넣어준다. 
+
+## PL/SQL SELECT 에러
+```SQL
+PLS-00428: an INTO clause is expected in this SELECT statement
+BEGIN
+    SELECT BUSEO FROM TBLINSA WHERE NAME = '홍길동';
+END;
+```
+- 원인: PL/SQL 블럭내부에서는 SELECT의 결과를 반드시 변수에 저장해야 한다.
+- 방법: SELECT절을 SELECT 컬럼 INTO 변수명 으로 수정한다.
+   --> SELECT BUSEO INTO 변수명 FROM TBLINSA WHERE NAME = '홍길동';
