@@ -466,7 +466,7 @@ SELECT
     END AS GENDER
 FROM TBLINSA;
 
-
+SELECT * FROM TBLCOUNTRY;
 -- TBLCOUNTRY, CONTINENT
 
 DECLARE
@@ -474,7 +474,7 @@ DECLARE
     VCONTINENT TBLCOUNTRY.CONTINENT%TYPE;
     VRESULT VARCHAR2(30);
 BEGIN
-    SELECT NAME, CONTINENT INTO VNAME, VCONTINENT FROM TBLCOUNTRY WHERE NAME = '대한민국';
+    SELECT NAME, CONTINENT INTO VNAME, VCONTINENT FROM TBLCOUNTRY WHERE NAME = '중국';
     
     IF VCONTINENT = 'AS' THEN
         VRESULT := '아시아';
@@ -497,4 +497,211 @@ BEGIN
     
     DBMS_OUTPUT.PUT_LINE(VNAME || '-' || VRESULT);
     
+END;
+
+/*
+
+    반복문
+    
+    1. loop
+        - 무한루프
+        - 탈출 조건 처리
+        
+    2. for loop
+        - 지정 횟수 반복(자바 for문 유사)
+    
+    3. while loop
+        - 조건 반복(자바 while문 유사)
+
+*/
+set serveroutput on;
+
+--예제1
+BEGIN
+    
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(TO_CHAR(SYSDATE, 'HH24:MI:SS'));
+    END LOOP;
+    
+END;
+
+--예제2
+DECLARE
+    VNUM NUMBER := 1;
+BEGIN
+
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(VNUM);
+        VNUM := VNUM + 1;
+        
+        --IF + BREAK: EXIT --> IF와는 다르게 조건을 만족하면 구문을 빠져나감
+        EXIT WHEN VNUM > 10;
+    END LOOP;
+
+END;
+
+
+
+
+CREATE TABLE TBLLOOP (
+    SEQ NUMBER PRIMARY KEY,
+    DATA VARCHAR2(30) NOT NULL
+);
+
+CREATE SEQUENCE SEQLOOP;
+
+-- 더미 데이터 + 10000개 추가
+-- DATA: '데이터1', '데이터2', '데이터3'...
+
+DECLARE
+    VNUM NUMBER := 1;
+BEGIN
+    LOOP
+        INSERT INTO TBLLOOP (SEQ, DATA) VALUES (SEQLOOP.NEXTVAL, '데이터' || VNUM);
+        VNUM := VNUM + 1;
+        EXIT WHEN VNUM > 10000;
+    END LOOP;
+END;
+
+SELECT * FROM TBLLOOP;
+DELETE FROM TBLLOOP;
+
+
+DECLARE
+    VNAME TBLINSA.NAME%TYPE;
+    VNUM NUMBER;
+BEGIN
+    -- TBLINSA. 직원번호 1015 ~ 1045, 이름, TBLLOOP 추가
+    VNUM := 1015;
+    LOOP
+        -- 1. 직원번호(1015~1045) 이름가져오기
+        SELECT NAME INTO VNAME FROM TBLINSA WHERE NUM = VNUM;
+        
+        -- 2. TBLLOOP 추가(INSERT)
+        INSERT INTO TBLLOOP (SEQ, DATA) VALUES (SEQLOOP.NEXTVAL, VNAME);
+        VNUM := VNUM + 1;
+        EXIT WHEN VNUM > 1045;
+    END LOOP;
+    
+END;
+
+SELECT * FROM TBLLOOP;
+
+
+-- FOR LOOP
+BEGIN
+
+    -- I: 루프변수
+    -- IN: 연결 키워드
+    -- 1:초깃값
+    -- 10: 최댓값
+    -- ..:증가
+    FOR I IN 1..10 LOOP
+        DBMS_OUTPUT.PUT_LINE(I);
+    END LOOP;
+    
+    FOR I IN REVERSE 1..10 LOOP
+        DBMS_OUTPUT.PUT_LINE(I);
+    END LOOP;
+END;
+
+
+-- 구구단
+CREATE TABLE TBLGUGUDAN (
+    --ORA-02260: table can have only one primary key
+    --DAN NUMBER NOT NULL PRIMARY KEY,
+    --NUM NUMBER NOT NULL PRIMARY KEY,
+    DAN NUMBER NOT NULL,
+    NUM NUMBER NOT NULL,
+    RESULT NUMBER NOT NULL,
+    
+    -- 복합키 만드는 방법1
+    CONSTRAINT TBLGUGUDAN_DAN_NUM_PK PRIMARY KEY(DAN, NUM) --> 복합키
+);
+
+-- 복합키 만드는 방법2
+ALTER TABLE TBLGUGUDAN
+    ADD CONSTRAINT TBLGUGUDAN_DAN_NUM_PK PRIMARY KEY(DAN, NUM);
+
+
+BEGIN
+    -- FOR IN 2..9 * 9
+    FOR VDAN IN 2..9 LOOP
+        FOR VNUM IN 1..9 LOOP
+            INSERT INTO TBLGUGUDAN (DAN, NUM, RESULT)
+                VALUES (VDAN, VNUM, VDAN * VNUM);
+        END LOOP;
+    END LOOP;
+END;
+
+SELECT * FROM TBLGUGUDAN;
+
+
+
+-- 위에서 했던 직원번호(1015~1045) 이름 삽입하기를
+-- FOR LOOP로 해보기
+-- 더 쉽다!
+DECLARE
+    VNAME TBLINSA.NAME%TYPE;
+BEGIN
+
+    FOR VNUM IN 1030..1040 LOOP
+
+        SELECT NAME INTO VNAME FROM TBLINSA WHERE NUM = VNUM;
+        
+        INSERT INTO TBLLOOP (SEQ, DATA) VALUES (SEQLOOP.NEXTVAL, VNAME);
+
+    END LOOP;
+    
+END;
+
+SELECT * FROM TBLLOOP;
+
+
+
+
+
+
+-- WHILE LOOP
+DECLARE
+    VNUM NUMBER := 1;
+BEGIN
+
+    --FOR 조건 LOOP
+    WHILE VNUM <= 10 LOOP
+        DBMS_OUTPUT.PUT_LINE(VNUM);
+        VNUM := VNUM + 1;
+    END LOOP;
+
+END;
+
+
+-- 예외 처리부
+DECLARE
+    VNUM NUMBER;
+    VNAME NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('시작');
+    -- ORA-06502: PL/SQL: numeric or value error: character to number conversion error
+    SELECT NAME INTO VNAME FROM TBLINSA WHERE NUM = 1001;
+    DBMS_OUTPUT.PUT_LINE(VNAME);
+    
+    -- VNUM := 10;
+    VNUM := 0;
+    -- ORA-01476: divisor is equal to zero
+
+    DBMS_OUTPUT.PUT_LINE(100 / VNUM);
+    
+    DBMS_OUTPUT.PUT_LINE('끝');
+    
+EXCEPTION
+    -- CATCH절, 예외 처리부
+    WHEN VALUE_ERROR THEN
+        DBMS_OUTPUT.PUT_LINE('자료형 불일치');
+    
+    WHEN ZERO_DIVIDE THEN
+        DBMS_OUTPUT.PUT_LINE('0으로 나누지못합니다');
+    
+    WHEN OTHERS THEN -- CATCH (EXCEPTION E) : 모든 종류의 예외 처리
+        DBMS_OUTPUT.PUT_LINE('예외처리');
 END;
