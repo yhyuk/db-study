@@ -158,4 +158,31 @@ END;
 ```
 - 원인: PL/SQL 블럭내부에서는 SELECT의 결과를 반드시 변수에 저장해야 한다.
 - 방법: SELECT절을 SELECT 컬럼 INTO 변수명 으로 수정한다.    
-   --> SELECT BUSEO INTO 변수명 FROM TBLINSA WHERE NAME = '홍길동';
+   --> SELECT BUSEO INTO 변수명 FROM TBLINSA WHERE NAME = '홍길동';     
+   
+## 테이블 PK값 생성 에러
+```SQL
+ORA-02260: table can have only one primary key
+CREATE TABLE TBLGUGUDAN (
+    DAN NUMBER NOT NULL PRIMARY KEY,
+    NUM NUMBER NOT NULL PRIMARY KEY,
+    RESULT NUMBER NOT NULL
+);
+```
+- 원인:
+- 방법:
+
+## PL/SQL 상수값 에러
+```SQL
+DECLARE
+    VNUM NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('시작');
+    VNUM := 0;
+    DBMS_OUTPUT.PUT_LINE(100 / VNUM);
+    DBMS_OUTPUT.PUT_LINE('끝');
+END;
+```
+ORA-01476: divisor is equal to zero
+- 원인:
+- 방법:
