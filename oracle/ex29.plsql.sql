@@ -693,7 +693,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE(100 / VNUM);
     
     DBMS_OUTPUT.PUT_LINE('끝');
-    
+
 EXCEPTION
     -- CATCH절, 예외 처리부
     WHEN VALUE_ERROR THEN
@@ -705,3 +705,347 @@ EXCEPTION
     WHEN OTHERS THEN -- CATCH (EXCEPTION E) : 모든 종류의 예외 처리
         DBMS_OUTPUT.PUT_LINE('예외처리');
 END;
+
+
+create table tblh (
+    name varchar2(20)
+);
+
+insert into tblh (name) values ('김영혁');
+insert into tblh (name) values ('');
+
+select * from tblh;
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+    PL/SQL
+    - SELECT -> 결과셋 -> PL/SQL 변수
+    
+    1. SELECT INTO 절 사용
+    - 결과셋의 레코드가 1개일 때만 사용 가능(****)
+    - 결과셋의 컬럼은 1개 이상~
+    - 자바의 Iterator 구조와 유사
+    
+    DECLARE
+        변수 선언;
+    BEGIN
+        SELECT 컬럼 INTO 변수 FROM 테이블;
+    END;
+    
+    2. CURSOR 사용
+    - 결과셋의 레코드가 0개 이상일 때 사용 가능(N개)
+    - 컬럼셋의 컬럼은 1개 이상~
+    - 일반적으로 결과셋의 레코드가 2개 이상일 때 권장
+    
+    DECLARE
+        커서 선언;
+    BEGIN
+        커서 열기;
+            LOOP
+                레코드 접근 -> 커서 사용
+            END LOOP;
+        커서 닫기;
+    END;
+
+*/
+SET SERVEROUTPUT ON;
+
+-- SELECT INTO 예제
+DECLARE
+    VNAME TBLINSA.NAME%TYPE;
+BEGIN
+    --SELECT NAME INTO VNAME FROM TBLINSA WHERE NUM = 1;    -- ORA-01403: no data found
+    --SELECT NAME INTO VNAME FROM TBLINSA;                  -- ORA-01422: exact fetch returns more than requested number of rows
+    SELECT NAME INTO VNAME FROM TBLINSA WHERE NUM = 1001;
+
+    DBMS_OUTPUT.PUT_LINE(VNAME);
+END;
+
+-- CURSOR 예제
+DECLARE
+    VNAME TBLINSA.NAME%TYPE;
+    
+    -- 커서 선언
+    CURSOR VCURSOR IS SELECT NAME FROM TBLINSA; -- 결과셋 참조 객체
+BEGIN
+    -- 커서 열기: 커서가 가지고 있는 SELECT문이 실행된다. > 결과셋 > 커서가 참조
+    OPEN VCURSOR;
+        
+        -- 커서 조작 -> 결과셋 탐색
+        -- LOOP: 결과셋의 레코드들을 탐색 루프
+        LOOP
+        
+            -- 커서를 전진한다. + 커서가 가르키는 레코드의 컬럼 접근(읽기)
+            FETCH VCURSOR INTO VNAME; -- SELECT NAME INTO VNAME과 유사하다
+            
+            -- 탈출 -> 더이상 읽어올 레코드가 없을 때
+            EXIT WHEN VCURSOR%NOTFOUND; -- 커서 프로퍼티
+            DBMS_OUTPUT.PUT_LINE(VNAME);
+            
+        END LOOP;
+        
+    -- 커서 닫기
+    CLOSE VCURSOR;
+END;
+
+
+-- CURSOR 예제2
+SELECT * FROM TBLCOUNTRY;
+
+DECLARE
+    CURSOR VCURSOR
+        IS SELECT NAME, CAPITAL, POPULATION FROM TBLCOUNTRY ORDER BY NAME ASC;
+    VNAME TBLCOUNTRY.NAME%TYPE;
+    VCAPITAL TBLCOUNTRY.CAPITAL%TYPE;
+    VPOPULATION TBLCOUNTRY.POPULATION%TYPE;
+BEGIN
+
+    OPEN VCURSOR;
+        LOOP
+            -- SELECT NAME, CAPITAL, POPULATION INTO VNAME, VCAPITAL, VPOPULATION
+            FETCH VCURSOR INTO VNAME, VCAPITAL, VPOPULATION;
+            EXIT WHEN VCURSOR%NOTFOUND;
+            
+            DBMS_OUTPUT.PUT_LINE(VNAME || '-' || VCAPITAL || '-' || VPOPULATION);
+        END LOOP;
+    CLOSE VCURSOR;
+    
+END;
+
+
+-- CURSOR 예제3
+-- 개발부 직원 -> 모두 보너스 지급
+SELECT * FROM TBLBONUS;
+
+DECLARE
+    CURSOR VCURSOR IS SELECT NUM, BASICPAY FROM TBLINSA WHERE BUSEO = '개발부';
+    VNUM TBLINSA.NUM%TYPE;
+    VBASICPAY TBLINSA.BASICPAY%TYPE;
+BEGIN
+
+    OPEN VCURSOR;
+        LOOP
+        
+            FETCH VCURSOR INTO VNUM, VBASICPAY;
+            EXIT WHEN VCURSOR%NOTFOUND;
+            
+            -- 여기부터 업무에 따라 고민..
+            INSERT INTO TBLBONUS (SEQ, PNUM, BONUS, REGDATE)
+                VALUES (SEQBONUS.NEXTVAL, VNUM, ROUND(VBASICPAY * 0.7), DEFAULT);
+        
+        END LOOP;
+    CLOSE VCURSOR;
+END;
+
+
+
+-- CURSOR 예제4
+-- TBLINSA. 개발부 직원 + 모든 컬럼
+DECLARE
+    CURSOR VCURSOR IS SELECT * FROM TBLINSA WHERE BUSEO = '개발부';
+    VROW TBLINSA%ROWTYPE; -- 레코드 참조 변수(컬럼 전체, 10개 짜리)
+BEGIN
+    OPEN VCURSOR;
+        LOOP
+            
+            FETCH VCURSOR INTO VROW; -- 컬럼 10개 -> 변수 10개 복사
+            EXIT WHEN VCURSOR%NOTFOUND;
+            
+            DBMS_OUTPUT.PUT_LINE(VROW.NAME);
+            DBMS_OUTPUT.PUT_LINE(VROW.BUSEO);
+            DBMS_OUTPUT.PUT_LINE('---');
+        
+        END LOOP;
+    CLOSE VCURSOR;
+END;
+
+
+
+-- CURSOR 간단하게 하는법?
+DECLARE
+    CURSOR VCURSOR IS SELECT * FROM TBLINSA WHERE BUSEO = '개발부';
+    -- VROW TBLINSA%ROWTYPE; -- 생략 -> 아래에서 만든다.
+BEGIN
+    --OPEN VCURSOR;
+        FOR VROW IN VCURSOR LOOP
+            
+            --FETCH VCURSOR INTO VROW;
+            --EXIT WHEN VCURSOR%NOTFOUND;
+            
+            DBMS_OUTPUT.PUT_LINE(VROW.NAME);
+            DBMS_OUTPUT.PUT_LINE(VROW.BUSEO);
+            DBMS_OUTPUT.PUT_LINE('---');
+        
+        END LOOP;
+    --CLOSE VCURSOR;
+END;
+
+-- 위 간단버전 주석 지우기 -> 굉장히 간편....
+DECLARE
+    CURSOR VCURSOR IS SELECT * FROM TBLINSA WHERE BUSEO = '개발부';
+BEGIN
+    FOR VROW IN VCURSOR LOOP -- VROW + LOOP + FETCH + EXIT WHEN
+        
+        DBMS_OUTPUT.PUT_LINE(VROW.NAME);
+        DBMS_OUTPUT.PUT_LINE(VROW.BUSEO);
+        DBMS_OUTPUT.PUT_LINE('---');
+    
+    END LOOP;
+END;
+
+
+-- 권장 안하지만, 더 간략하게 하는법
+CREATE VIEW VWDEV
+AS
+SELECT * FROM TBLINSA WHERE BUSEO = '개발부';
+
+SELECT * FROM VWDEV;
+SELECT * FROM (SELECT * FROM TBLINSA WHERE BUSEO = '개발부'); -- 인라인 뷰
+
+-- 인라인 커서, -> 간략한 방법
+-- 권장 안하는 이유?
+-- 1. 가독성이 낮다.
+-- 2. 예제 처럼 단순한 쿼리에만 사용한다.
+BEGIN
+    FOR VROW IN (SELECT * FROM TBLINSA WHERE BUSEO = '개발부') LOOP
+        
+        DBMS_OUTPUT.PUT_LINE(VROW.NAME);
+        DBMS_OUTPUT.PUT_LINE(VROW.BUSEO);
+        DBMS_OUTPUT.PUT_LINE('---');
+    
+    END LOOP;
+END;
+
+
+
+
+
+
+/*
+     프로시저
+     - PL/SQL 블럭(DECLARE, BEGIN, EXCEPTION, END)
+     1. 익명 프로시저
+        - 1회용(DB에 저장이 안됨, HDD에 *.sql로 저장)
+        - 객체가 아니다!
+        - 속도가 느리다.
+        - 테스트용, 임시 개발용
+        
+    2. 실명 프로시저
+        - 저장용(DB에 저장이 된다)
+        - 객체이다.
+        - 재사용 가능, 타 유저에 공유 가능
+        - 속도가 빠르다.
+        - 업무용
+        
+    실명 프로시저 > 저장 프로시저(Stored Procedure)
+    1. 저장 프로시저(Stored Procedure)
+        - 매개변수 구성 OR 반환값 구성 -> 자유
+    
+    2. 저장 함수(Stored Function)
+        - 매개변수 필수, 반환값 필수 -> 고정
+        
+    익명 프로시저 선언
+    [DECLARE 
+        변수 선언;
+        커서 선언;] --생략가능
+    BEGIN
+        구현부;
+    [EXCEPTION
+        예외처리;] --생략가능
+    END;
+    
+    
+    저장 프로시저 선언
+    CREATE [OR REPLACE] PROCEDURE 프로시저명
+    IS(AS)
+    [DECLARE
+        변수 선언;
+        커서 선언;]
+    BEGIN
+        구현부;
+    [EXCEPTION
+        예외처리;] 
+    END;
+    
+    
+*/
+
+
+DECLARE
+    VNUM NUMBER;
+BEGIN
+    VNUM := 100;
+    DBMS_OUTPUT.PUT_LINE(VNUM);
+END;
+
+CREATE OR REPLACE PROCEDURE PROCTEST
+IS
+    VNUM NUMBER;
+BEGIN
+    VNUM := 100;
+    DBMS_OUTPUT.PUT_LINE(VNUM);
+END;
+
+
+
+
+
+/*
+    
+    저장 프로시저를 호출하는 방법
+    
+    1. 스크립트 환경에서 호출하기(ANSI-SQL 환경에서)
+    2. PL/SQL 블럭에서 호출하기
+
+*/
+
+
+-- 2. PL/SQL 블럭에서 호출하기
+BEGIN
+    PROCTEST;
+END;
+
+
+-- ANSI-SQL 환경
+PROCTEST;
+
+--1. 스크립트 환경에서 호출하기(ANSI-SQL 환경에서)
+    EXECUTE PROCTSET
+    
+    
+/*
+
+    프로젝트 적용
+    1. 두 방식 모두 사용
+    2. 비율 알아서 나누기..
+        a. 핵심 업무(저장 프로시저). 잡다한 업무(ANSI-SQL)
+        b. 회원, 게시판(저장 프로시저). 관리자(ANSI-SQL)
+
+
+    SQL 처리 순서
+
+    1. ANSI-SQL or 익명 프로시저
+        - 클라이언트 구문 작성(select) -> 실행(Ctrl+Enter) -> 명령어가 오라클 서버에 전달
+            -> 서버에서 명령어를 수신 -> 구문 분석(파싱) -> 컴파일 -> 실행 -> 결과 도출
+            -> 결과셋을 클라이언트에게 반환
+        - 한번 실행했던 명령어를 다시 실행 -> 위의 과정을 다시 처음부터 끝까지 모든 과정을 재실행한다.
+        - 첫번째 실행 비용 = 다시 실행 비용
+    
+    2. 저장 프로시저(PL/SQL)
+        - 클라이언트 구문 작성(select) -> 실행(Ctrl+Enter) -> 명령어가 오라클 서버에 전달
+            -> 서버에서 명령어를 수신 -> 구문 분석(파싱) -> 컴파일 -> 실행 -> 결과 도출
+            -> 결과셋을 클라이언트에게 반환
+        - 한번 실행했던 명령어를 다시 실행 -> "구문 분석(파싱) -> 컴파일" 과정이 생략된다. : 이부분 비용 감소
+        - 첫번째 실행 비용 > 다시 실행 비용
+
+*/
