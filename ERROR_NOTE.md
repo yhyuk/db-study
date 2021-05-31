@@ -174,6 +174,7 @@ CREATE TABLE TBLGUGUDAN (
 
 ## PL/SQL 상수값 에러
 ```SQL
+ORA-01476: divisor is equal to zero
 DECLARE
     VNUM NUMBER;
 BEGIN
@@ -183,6 +184,5 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('끝');
 END;
 ```
-ORA-01476: divisor is equal to zero
 - 원인:
 - 방법:
