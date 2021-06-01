@@ -767,7 +767,6 @@ BEGIN
     --SELECT NAME INTO VNAME FROM TBLINSA WHERE NUM = 1;    -- ORA-01403: no data found
     --SELECT NAME INTO VNAME FROM TBLINSA;                  -- ORA-01422: exact fetch returns more than requested number of rows
     SELECT NAME INTO VNAME FROM TBLINSA WHERE NUM = 1001;
-
     DBMS_OUTPUT.PUT_LINE(VNAME);
 END;
 
@@ -996,6 +995,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE(VNUM);
 END;
 
+SELECT * FROM PROCTEST;
 
 
 
@@ -1020,7 +1020,7 @@ END;
 PROCTEST;
 
 --1. 스크립트 환경에서 호출하기(ANSI-SQL 환경에서)
-    EXECUTE PROCTSET
+    EXECUTE PROCTSET;
     
     
 /*
@@ -1049,3 +1049,178 @@ PROCTEST;
         - 첫번째 실행 비용 > 다시 실행 비용
 
 */
+
+/*
+
+    질의 실행
+    1. ANSI-SQL(Text SQL)
+    2. 익명 프로시저 = ANSI-SQL + PL/SQL = 개발자(테스트)용
+    3. 저장 프로시저 = ANSI-SQL + PL/SQL = 코드 저장 = 영구적 재사용
+
+    --> 공부하는 입장에서 언제 각각 쓰이는지 알 수가없음.... 경험에 의해서 많이 봐야함
+
+*/
+
+-- ANSI-SQL
+SELECT NAME FROM TBLINSA;
+
+set serveroutput on;
+
+CREATE OR REPLACE PROCEDURE PROCINSA
+IS
+    CURSOR VCURSOR IS SELECT NAME FROM TBLINSA;
+    VNAME TBLINSA.NAME%TYPE;
+BEGIN
+    
+    OPEN VCURSOR;
+        LOOP
+            FETCH VCURSOR INTO VNAME;
+            EXIT WHEN VCURSOR%NOTFOUND;
+            
+            -- 클라이언트에게 반환하는 작업이라고 가정(return) > 아직 수업안함
+            DBMS_OUTPUT.PUT_LINE(VNAME);
+        END LOOP;
+    CLOSE VCURSOR;
+    
+END;
+
+BEGIN
+    PROCINSA;
+END;
+
+
+
+
+
+-- 프로시저는 즉 메소드랑 비슷...
+-- 1. 매개변수
+-- 2. 반환값
+
+-- 매개변수 선언하기 예제1
+CREATE OR REPLACE PROCEDURE procTest(pnum NUMBER) -- 매개변수 리스트
+IS
+    vsum NUMBER := 0; -- 로컬변수
+BEGIN
+    vsum := pnum + 100;
+    DBMS_OUTPUT.PUT_LINE(vsum);
+END procTest;
+
+BEGIN
+    procTest(100);
+END;
+
+
+-- 매개변수 선언하기 예제2
+-- 보통 매개변수를 이런식으로 작성한다. (CODE CONVETION)
+CREATE OR REPLACE PROCEDURE procTest (
+    width NUMBER,
+    height NUMBER DEFAULT 10 -- 매개변수에 기본값 저장 가능 --> 자바의 오버로딩과 비슷하다.
+)
+IS
+    vresult NUMBER;
+BEGIN
+    vresult := width * height;
+    DBMS_OUTPUT.PUT_LINE(vresult);
+END procTest;
+
+BEGIN
+    procTest(100, 200);
+    procTest(100);
+END;
+
+
+
+/*
+    매개변수 모드(*******************)
+    - 매개변수의 값을 전달하는 방식
+    
+    1. IN 모드(기본 모드) : 아무것도 지정 X
+    2. OUT 모드
+    3. IN OUT 모드(사용 안함)
+    
+*/
+
+CREATE OR REPLACE PROCEDURE procTest(
+    vnum1 IN NUMBER, -- vnum1 NUMBER랑 똑같다. --> 아무것도 지정안하면 IN MODE(값 전달 변수) 
+    vnum2 IN NUMBER,
+    vresult OUT NUMBER, -- OUT MODE(주소값 참조 변수)
+    vresult2 OUT NUMBER, -- OUT MODE(주소값 참조 변수)
+    vresult3 OUT NUMBER -- OUT MODE(주소값 참조 변수)
+)
+IS 
+BEGIN
+    vresult := vnum1 + vnum2;
+    vresult2 := vnum1 * vnum2;
+    vresult3 := vnum1 / vnum2;
+END;
+
+-- vreuslt에는 매개변수 값을 어떻게 넣을까?? 
+DECLARE
+    vsum NUMBER;
+    vsum2 NUMBER;
+    vsum3 NUMBER;
+BEGIN
+    procTest(10, 20, vsum, vsum2, vsum3);
+    DBMS_OUTPUT.PUT_LINE(vsum);
+    DBMS_OUTPUT.PUT_LINE(vsum2);
+    DBMS_OUTPUT.PUT_LINE(vsum3);
+END;
+
+
+-- 요구사항1] 부서 지정 -> 부서 내에서 급여를 가장 많이 받는 직원의 이름을 반환
+CREATE OR REPLACE PROCEDURE procTest (
+    pbuseo IN VARCHAR2,
+    pname OUT VARCHAR2
+)
+IS
+    VSALARY NUMBER;
+BEGIN
+    --방법1
+    --SELECT name INTO pname FROM tblInsa
+    --   WHERE BASICPAY = (SELECT MAX(basicpay) FROM tblInsa WHERE buseo = pbuseo);
+    
+    --방법2
+    SELECT MAX(basicpay) INTO vsalary FROM tblInsa WHERE buseo = pbuseo;
+    SELECT NAME INTO pname FROM tblInsa WHERE BASICPAY = VSALARY;
+        
+END procTest;
+
+DECLARE
+    vname VARCHAR2(30);
+BEGIN
+    procTest('개발부', vname);
+    DBMS_OUTPUT.PUT_LINE(vname);
+END;
+
+
+-- 요구사항2] 직원번호 -> 같은 지역의 직원 수, 같은 직위의 직원 수, 같은 부서의 직원 수 반환
+CREATE OR REPLACE PROCEDURE PROCTEST(
+    PNUM NUMBER,        -- 직원 번호(IN)
+    PCNT1 OUT NUMBER,   -- 같은 지역
+    PCNT2 OUT NUMBER,   -- 같은 직위
+    PCNT3 OUT NUMBER    -- 같은 부서
+)
+IS
+BEGIN
+    -- 같은 지역 
+    SELECT COUNT(*) INTO PCNT1 FROM TBLINSA
+        WHERE CITY = (SELECT CITY FROM TBLINSA WHERE NUM = PNUM);
+    -- 같은 직위
+    SELECT COUNT(*) INTO PCNT2 FROM TBLINSA
+        WHERE JIKWI = (SELECT JIKWI FROM TBLINSA WHERE NUM = PNUM);
+    -- 같은 부서 
+    SELECT COUNT(*) INTO PCNT1 FROM TBLINSA
+        WHERE BUSEO = (SELECT CITY FROM TBLINSA WHERE NUM = PNUM);
+        
+END procTEST;
+
+DECLARE
+    VCNT1 NUMBER;
+    VCNT2 NUMBER;
+    VCNT3 NUMBER;
+BEGIN
+    PROCTEST(1001,VCNT1, VCNT2, VCNT3);
+    DBMS_OUTPUT.PUT_LINE('같은 지역: ' || VCNT1);
+    DBMS_OUTPUT.PUT_LINE('같은 직위: ' || VCNT2);
+    DBMS_OUTPUT.PUT_LINE('같은 부서: ' || VCNT3);
+END;
