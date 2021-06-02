@@ -1020,8 +1020,9 @@ END;
 PROCTEST;
 
 --1. 스크립트 환경에서 호출하기(ANSI-SQL 환경에서)
-    EXECUTE PROCTSET;
-    
+EXECUTE PROCTSET;
+EXEC PROCTEST;
+CALL PROCTEST(); -- CALL사용시 () 필수 
     
 /*
 
@@ -1188,7 +1189,7 @@ END procTest;
 DECLARE
     vname VARCHAR2(30);
 BEGIN
-    procTest('개발부', vname);
+    procTest('개발부'  , vname);
     DBMS_OUTPUT.PUT_LINE(vname);
 END;
 
@@ -1224,3 +1225,149 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('같은 직위: ' || VCNT2);
     DBMS_OUTPUT.PUT_LINE('같은 부서: ' || VCNT3);
 END;
+
+
+
+
+
+SET 
+/* 2021-06-02 */
+
+-- 특정 직원 퇴사 -> 담당 업무 존재 확인? -> 업무 위임 -> 퇴사
+select * from tblStaff;
+select * from tblProject;
+
+create or replace procedure procDeleteStaff (
+    pseq number,                -- 퇴사할 직원번호(tblStaff.PK)
+    pstaff number,              -- 위임받을 직원번호(tblProject.staff)
+    presult out number          -- 성공(1) or 실패(0)
+)
+IS
+    vcnt number; -- 퇴사 직원의 담당 프로젝트 갯수
+BEGIN
+    -- 1. 퇴사직원의 담당 프로젝트가 있는지?
+    select count(*) into vcnt from tblProject where staff_Seq = pseq;
+    DBMS_OUTPUT.PUT_LINE('퇴사할 직원이' || VCNT || '개의 프로젝트를 담당하고 있습니다.');
+    -- 2. 1의 결과 > 있으면(위임), 없으면(X)
+    if vcnt > 0 then
+        -- 위임
+        UPDATE tblProject SET staff_Seq = pstaff WHERE staff_Seq = pseq;
+        DBMS_OUTPUT.PUT_LINE(pseq || '의 프로젝트를' || pstaff || '에게 위임합니다.');
+    ELSE
+        NULL;
+        DBMS_OUTPUT.PUT_LINE('위임할 프로젝트가 없습니다.');
+    END IF;
+    
+    -- 3. 퇴사 처리
+    DELETE FROM tblstaff WHERE seq = pseq;
+    DBMS_OUTPUT.PUT_LINE(pseq || '가 퇴사합니다.');
+    
+    presult := 1; -- 4. 성공
+EXCEPTION
+    WHEN OTHERS THEN
+        presult := 0; -- 4. 실패
+END procDeleteStaff;
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    vresult NUMBER;
+BEGIN
+    procDeleteStaff (1, 2, vresult);
+    
+    IF vresult = 1 THEN
+        DBMS_OUTPUT.PUT_LINE('퇴사 성공');
+    ELSE 
+        DBMS_OUTPUT.PUT_LINE('퇴사 실패');
+    END IF;
+END;
+-- 복습
+
+
+/*
+    DB 프로젝트
+    - 업무 100개 기준으로...
+    - ANSI-SQL: 200 ~ 500개
+    - 일부(주요) 업무 : 프로시저로 생성, 10 ~ 20%, 10~20개
+    - 일부(특수) 업무 : 함수, 트리거 생성, 3 ~ 5%, 3~5개 
+    
+    - 실제 프로젝트 -> 일부 사용O, 일부 사용X
+    - 교육(취업) 프로젝트 -> 골고루 사용O -> 포트폴리오에 들어갈 정도의 분량
+*/
+
+
+
+
+/*
+
+    1. 저장 프로시저
+        - 반드시 매개변수가 있어야 한다. (갯수는 0개이상, 일반적으로는 1개 이상)
+        - 반환값이 0개 이상 (OUT 파라미터 x N개 생성)
+        
+    2. 저장 함수
+        - 반드시 매개변수가 있어야 한다. (갯수는 0개이상, 일반적으로는 1개 이상)
+        - 반드시 반환값이 있어야 한다.(반드시 1개)
+
+*/
+
+-- 자바와 데이터베이스의 메소드 생성 차이
+-- 반환타입 선언은 어떻게? > 뒤에 return 반환타입 작성
+-- public int fnSum(int pnum1, int pnum2) {}
+-- CREATE OR REPLACE FUNCTION fnSum (pnum1 NUMBER, pnum2 NUMBER) return NUMBER
+
+
+CREATE OR REPLACE FUNCTION fnSum (
+    pnum1 NUMBER,
+    pnum2 NUMBER
+    --presult OUT NUMBER -- OUT을 사용하는 행동 > 반환값이 여러개일 수 있다는 뜻
+) return NUMBER
+IS
+BEGIN
+    RETURN pnum1 + pnum2;
+END fnSum;
+
+-- RETURN   쓰면 함수
+-- OUT      쓰면 프로시저 라고 생각하자
+
+DECLARE
+    vresult NUMBER;
+BEGIN
+    vresult := fnSum(100, 200);
+    DBMS_OUTPUT.PUT_LINE(vresult);
+    DBMS_OUTPUT.PUT_LINE(fnSum(100, 200));
+END;
+
+-- 함수는 어떨때 쓰일까?
+-- 1. 반환값을 받는 방식의 차이때문에 사용 되는 용도가 다르다.
+-- 2. PL/SQL(X)
+-- 3. 저장함수는 ANSI-SQL에서 사용이 가능하다.(**************)
+SELECT NAME, BASICPAY, SUDANG, BASICPAY+SUDANG, fnSum(BASICPAY, SUDANG) FROM TBLINSA;
+
+
+
+SELECT NAME, BUSEO, JIKWI,
+    CASE
+        WHEN SUBSTR(SSN, 8, 1) = '1' THEN '남자'
+        WHEN SUBSTR(SSN, 8, 1) = '2' THEN '여자'
+    END AS GENDER
+FROM TBLINSA;
+
+-- TBLINSA에서 주민번호로 여자/남자 구분할때 CASE-END문 썼음
+-- > 남자 여자 구분하는 저장 함수 만들기
+CREATE OR REPLACE FUNCTION fnGender(
+    pssn VARCHAR2
+) RETURN VARCHAR2
+IS
+BEGIN
+    return  CASE 
+                WHEN SUBSTR(pssn, 8, 1) = '1' THEN '남자'
+                WHEN SUBSTR(pssn, 8, 1) = '2' THEN '여자'
+            END;
+END fnGender;
+
+SELECT NAME, BUSEO, JIKWI, fnGender(ssn) FROM TBLINSA; --> fnGender 함수를 만듦으로써 한줄로 작성가능(편리)
+
+
+-- 함수 <-> 프로시저
+-- 저장 함수: ANSI-SQL을 보조하는 역할
+-- 저장 프로시저: 행동의 단위(메소드 개념)
