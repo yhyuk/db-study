@@ -1230,7 +1230,6 @@ END;
 
 
 
-SET 
 /* 2021-06-02 */
 
 -- 특정 직원 퇴사 -> 담당 업무 존재 확인? -> 업무 위임 -> 퇴사
@@ -1371,3 +1370,319 @@ SELECT NAME, BUSEO, JIKWI, fnGender(ssn) FROM TBLINSA; --> fnGender 함수를 �
 -- 함수 <-> 프로시저
 -- 저장 함수: ANSI-SQL을 보조하는 역할
 -- 저장 프로시저: 행동의 단위(메소드 개념)
+
+
+
+/* 2021-06-03 */
+
+-- 저장프로시저, OUT PARAMETER
+-- 1. 결과셋의 레코드가 1개일때 대응
+-- 2. 결과셋의 레코드가 N개일때 대응
+CREATE OR REPLACE PROCEDURE procTest (
+    pnum IN NUMBER,         -- 직원번호
+    pname OUT VARCHAR2,     -- 직원이름
+    pjikwi OUT VARCHAR2,    -- 직위
+    pbuseo OUT VARCHAR2     -- 부서
+)
+IS
+BEGIN
+    SELECT NAME, JIKWI, BUSEO INTO pname, pjikwi, pbuseo FROM TBLINSA
+        WHERE NUM = pnum;
+        
+    --DBMS_OUTPUT.PUT_LINE(pname);
+    --DBMS_OUTPUT.PUT_LINE(pjikwi);
+    --DBMS_OUTPUT.PUT_LINE(pbuseo);
+END procTest;
+
+SET SERVEROUTPUT ON;
+DECLARE
+    vname TBLINSA.NAME%TYPE;
+    vjikwi TBLINSA.JIKWI%TYPE;
+    vbuseo TBLINSA.BUSEO%TYPE;
+BEGIN
+    procTest(1001, vname, vjikwi, vbuseo);
+    DBMS_OUTPUT.PUT_LINE(vname);
+    DBMS_OUTPUT.PUT_LINE(vjikwi);
+    DBMS_OUTPUT.PUT_LINE(vbuseo);
+END;
+
+
+
+-- 부서 -> 목록반환
+-- 1. 저장 프로시저 -> 단일값 반환(커서 반환 가능,   ANSI-SQL 자료형 + PL/SQL 자료형(CURSOR))
+-- 2. 저장 함수     -> 단일값 반환(커서 반환 불가능, ANSI-SQL 자료형만 반환가능(NUMBER, STRING, DATE)
+
+CREATE OR REPLACE PROCEDURE procTest (
+    pbuseo IN VARCHAR2,         -- 부서(조건)
+    pcursor OUT SYS_REFCURSOR   -- CURSOR 자료형과 동일한 자료형. 반환값 타입으로 사용.
+)
+IS
+BEGIN
+    OPEN pcursor
+        FOR SELECT * FROM TBLINSA WHERE BUSEO = pbuseo;
+END procTest;
+
+-- 어렵지않아요 ~
+
+DECLARE
+    -- cursor pcursor IS SELECT * FROM TBLINSA WHERE BUSEO = pbuseo;
+    pcursor sys_refcursor;
+    vrow TBLINSA%ROWTYPE;
+BEGIN
+    procTest('개발부', pcursor);
+    
+    -- pcursor + open ...
+    -- 위에서 커서작업이 끝났다. -> 우리가 커서를 배울때 open - close 안에 loop - end loop 기억하지? 그걸 여기서 쓴다.
+    LOOP
+        FETCH pcursor INTO vrow;
+        EXIT WHEN pcursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE(vrow.NAME);
+    END LOOP;
+END;
+
+
+-- 직원 번호 전달 -> 어디 거주? -> 같은 지역 직원 명단 반환
+CREATE OR REPLACE PROCEDURE procTest(
+    pnum IN NUMBER,             -- 직원 번호
+    pcursor out sys_refcursor   -- 직원 명단
+)
+IS
+    vcity TBLINSA.CITY%TYPE;
+BEGIN
+    -- 어디 거주?
+    SELECT CITY INTO vcity FROM TBLINSA WHERE NUM = pnum;
+    
+    -- 같은 지역 직원 명단 반환
+    OPEN PCURSOR FOR
+        SELECT * FROM TBLINSA WHERE CITY = vcity;
+        
+END procTest;
+
+-- 확인
+DECLARE
+    vcursor SYS_REFCURSOR;
+    VROW TBLINSA%ROWTYPE;
+BEGIN
+    procTest(1030, vcursor);
+    LOOP
+        FETCH VCURSOR INTO vrow;
+        EXIT WHEN VCURSOR%NOTFOUND;
+        
+        -- 업무구현
+        DBMS_OUTPUT.PUT_LINE(vrow.NAME || '-' || vrow.CITY);
+    END LOOP;
+END;
+
+
+
+
+/*
+
+    트리거, Trigger
+    - 프로시저의 한 종류(****)
+    - 개발자의 호출이 아닌, 미리 지정한 특정 사건이 발생하면 자동으로 실행되는 프로시저(예약+이벤트)
+    - 특정 테이블 지정 -> 감시 -> insert or update or delete -> 미리 준비해놓은 프로시저가 자동 실행
+    - 트리거가 많아지면 시스템 속도가 느려진다.
+
+    트리거 구문
+    
+    create or replace trigger 트리거명
+        - 트리거 옵션
+        before | after
+        insert | update | delete on 테이블명
+        [for each row]
+    declare
+        선언부;
+    begin
+        실행부;
+        [inserting, updating, deleting] ****
+    exception
+        예외처리부
+    end;
+
+*/
+
+CREATE TABLE tblLog (
+    seq NUMBER PRIMARY KEY,
+    num NUMBER NOT NULL REFERENCES tblInsa(num),
+    regdate DATE DEFAULT SYSDATE NOT NULL
+)
+
+CREATE SEQUENCE seqLog;
+
+CREATE TABLE tblBoard (
+    seq NUMBER PRIMARY KEY,
+    num NUMBER NOT NULL REFERENCES tblInsa(num),
+    subject VARCHAR2(1000) NOT NULL
+)
+
+CREATE SEQUENCE seqBoard;
+
+
+-- 트리거 객체 생성 + 트리거 작동 시작
+-- 직원들 > tblBoard 글 작 성 -> 관리자 확인 + 모니터링 + tblLog
+CREATE OR REPLACE TRIGGER trgBoard 
+    AFTER           -- 사전 전/후 (BEFORE / AFTER)
+    INSERT          -- 감시 사건
+    ON tblBoard     -- 감시 대상
+DECLARE
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('직원이 글을 작성 했습니다.');
+END;
+
+-- 컨트롤 엔터
+-- 트리거 객체 생성 + 트리거 작동 시작
+
+
+
+
+
+
+
+-- 글 쓰기
+INSERT INTO tblBoard (seq, num, subject)
+    VALUES (seqBoard.nextVal, (SELECT NUM FROM TBLINSA WHERE NAME = '홍길동'), '테스트 입니다.');
+-- 직원이 글을 작성 했습니다.
+-- 1 행 이(가) 삽입되었습니다.
+
+DROP TRIGGER TRGBOARD; -- 트리거(CCTV 비유)를 제거하면 '직원이 글을 작성 했습니다'가 안뜸(감시해제)
+
+
+
+-- 트리거 예제2)
+CREATE OR REPLACE TRIGGER trgBoard 
+    AFTER           
+    INSERT         
+    ON tblBoard     
+DECLARE
+    vnum NUMBER;
+BEGIN
+    -- 누가 글을 썼는지 tblLog 테이블에 기록
+    -- 누가?? -> 마지막 글을 쓴 사람?
+    SELECT num INTO vnum FROM tblBoard WHERE seq = (SELECT MAX(seq) FROM tblBoard);
+    
+    -- 로그 기록
+    INSERT INTO tblLog (seq, num, regdate) VALUES (seqLog.nextVal, vnum, default);
+END;
+
+
+INSERT INTO tblBoard (seq, num, subject)
+    VALUES (seqBoard.nextVal, (SELECT NUM FROM TBLINSA WHERE NAME = '홍길동'), '테스트 입니다.');
+
+INSERT INTO tblBoard (seq, num, subject)
+    VALUES (seqBoard.nextVal, (SELECT NUM FROM TBLINSA WHERE NAME = '이순신'), '테스트 입니다.');
+
+INSERT INTO tblBoard (seq, num, subject)
+    VALUES (seqBoard.nextVal, (SELECT NUM FROM TBLINSA WHERE NAME = '유관순'), '테스트 입니다.');
+
+SELECT * FROM tblLog;
+
+-- INNER JOIN
+SELECT 
+    i.name AS "직원명",
+    TO_CHAR(l.regDate, 'hh24:mi:ss') AS "시각"
+FROM tblLog l
+    INNER JOIN tblInsa i
+        ON i.num = l.num;
+        
+-- 상관 서브 쿼리
+SELECT 
+    (SELECT NAME FROM TBLINSA WHERE NUM = tblLog.num) AS "직원명",
+    TO_CHAR(regDate, 'hh24:mi:ss') AS "시각"
+FROM tblLog;
+
+SELECT * FROM TBLBOARD;
+SELECT * FROM TBLLOG;
+COMMIT;
+ROLLBACK;
+
+-- 자식 테이블 찾기!!!
+
+-- 1. ERD 확인
+-- - ERD 없음
+-- - ERD 갱신 안함.............;;;
+
+-- 2. 조회(관리자SYSTEM 만 가능)
+SELECT fk.owner, fk.constraint_name , fk.table_name
+FROM all_constraints fk, all_constraints pk
+WHERE fk.R_CONSTRAINT_NAME = pk.CONSTRAINT_NAME
+AND fk.CONSTRAINT_TYPE = 'R'
+AND pk.TABLE_NAME = 'TBLINSA' -- 검색할 테이블명
+ORDER BY fk.TABLE_NAME;
+
+drop table tblBONUS;
+drop table tblLOG;
+drop table tblBoard;
+
+-- 3. ERD 도구 -> 역공학
+
+-- 4. 강제 삭제 -> FK 걸려있어도 무시하고 삭제
+-- 그다지 좋은 방법은 아님.
+-- 자식이 있는 부모 테이블을 삭제하는 방법(부모를 강제로 삭제, 자식 테이블은 그대로 유지)
+drop table tblUser cascade constraints purge; --Table TBLUSER이(가) 삭제되었습니다.
+
+
+
+
+-- 트리거 예제3)
+-- tblInsa. 직원 퇴사
+-- 특정 요일(목)에는 퇴사를 할 수 없다.
+DELETE FROM tblInsa WHERE NUM = 1001;
+ROLLBACK;
+
+CREATE OR REPLACE TRIGGER trgInsa
+    BEFORE
+    DELETE
+    ON tblInsa
+BEGIN
+    -- DBMS_OUTPUT.PUT_LINE('트리거 발생'); -- 트리거가 제대로 동작하는지 TEST작업
+    
+    IF TO_CHAR(SYSDATE, 'dy') = '목' THEN
+        -- 현재 실행 되려는 DELETE 작업을 없었던걸로 만들기 -> 강제로 예외 발생!! (Java로 치면 thorw new Exception)
+        -- -20000 ~ 29999
+        RAISE_APPLICATION_ERROR(-20001, '목요일에는 퇴사가 불가능합니다.');
+    END IF;
+END trgInsa;
+
+
+
+-- 로그 트리거
+-- tblMen 테이블에서 발생하는 모든변화(INSERT, UPDATE, DELETE)를 기록하는 로그 테이블
+CREATE TABLE tblLogMen (
+    seq NUMBER PRIMARY KEY,
+    message VARCHAR2(1000) NOT NULL,
+    regdate DATE DEFAULT SYSDATE NOT NULL
+);
+
+CREATE SEQUENCE seqLogMen;
+
+CREATE OR REPLACE TRIGGER trgLogMen
+    AFTER
+    INSERT OR UPDATE OR DELETE
+    ON tblMen
+DECLARE
+    vmessage VARCHAR2(1000);
+BEGIN
+    -- 어떤 사건? INSERT OR UPDATE OR DELETE
+    -- DBMS_OUTPUT.PUT_LINE('사건 발생');
+    
+    -- 예약 상수
+    IF INSERTING THEN
+        vmessage := '새 인원이 추가되었습니다.';
+    ELSIF UPDATING THEN 
+        vmessage := '특정 인원의 정보가 수정되었습니다.';
+    ELSIF DELETING THEN
+        vmessage := '특정 인원이 삭제되었습니다.';
+    END IF;
+    
+    INSERT INTO tblLogMen (seq, message, regdate)
+        values (seqLogMen.nextVal, vmessage, default);
+
+END trgLogMen;
+
+SELECT * FROM tblMen;
+DELETE FROM tblMen WHERE NAME = '아무개';
+UPDATE tblMen SET WEIGHT = 80 WHERE NAME = '하하하';
+
+select * from tblLogMen;
