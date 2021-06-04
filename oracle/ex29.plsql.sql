@@ -1534,12 +1534,6 @@ END;
 -- 컨트롤 엔터
 -- 트리거 객체 생성 + 트리거 작동 시작
 
-
-
-
-
-
-
 -- 글 쓰기
 INSERT INTO tblBoard (seq, num, subject)
     VALUES (seqBoard.nextVal, (SELECT NUM FROM TBLINSA WHERE NAME = '홍길동'), '테스트 입니다.');
@@ -1577,6 +1571,7 @@ INSERT INTO tblBoard (seq, num, subject)
     VALUES (seqBoard.nextVal, (SELECT NUM FROM TBLINSA WHERE NAME = '유관순'), '테스트 입니다.');
 
 SELECT * FROM tblLog;
+
 
 -- INNER JOIN
 SELECT 
@@ -1628,8 +1623,6 @@ drop table tblUser cascade constraints purge; --Table TBLUSER이(가) 삭제되�
 -- 트리거 예제3)
 -- tblInsa. 직원 퇴사
 -- 특정 요일(목)에는 퇴사를 할 수 없다.
-DELETE FROM tblInsa WHERE NUM = 1001;
-ROLLBACK;
 
 CREATE OR REPLACE TRIGGER trgInsa
     BEFORE
@@ -1638,17 +1631,23 @@ CREATE OR REPLACE TRIGGER trgInsa
 BEGIN
     -- DBMS_OUTPUT.PUT_LINE('트리거 발생'); -- 트리거가 제대로 동작하는지 TEST작업
     
-    IF TO_CHAR(SYSDATE, 'dy') = '목' THEN
+    IF TO_CHAR(SYSDATE, 'dy') = '금' THEN
         -- 현재 실행 되려는 DELETE 작업을 없었던걸로 만들기 -> 강제로 예외 발생!! (Java로 치면 thorw new Exception)
         -- -20000 ~ 29999
         RAISE_APPLICATION_ERROR(-20001, '목요일에는 퇴사가 불가능합니다.');
     END IF;
 END trgInsa;
 
+-- 테스트를 위한 DELETE
+DELETE FROM TBLINSA WHERE NUM = 1001; --> 현재 오늘 날짜는 목요일이므로 삭제 안됨 > 로그 출력됨 '목요일에는 퇴사가 불가능합니다.'
+ROLLBACK;
 
 
--- 로그 트리거
--- tblMen 테이블에서 발생하는 모든변화(INSERT, UPDATE, DELETE)를 기록하는 로그 테이블
+
+
+-- 트리거 예제4)
+-- tblMen. 
+-- 테이블에서 발생하는 모든변화(INSERT, UPDATE, DELETE)를 기록하는 로그 테이블
 CREATE TABLE tblLogMen (
     seq NUMBER PRIMARY KEY,
     message VARCHAR2(1000) NOT NULL,
@@ -1681,8 +1680,312 @@ BEGIN
 
 END trgLogMen;
 
+-- 트리거 테스트를 위한 DELETE, UPDATE
 SELECT * FROM tblMen;
 DELETE FROM tblMen WHERE NAME = '아무개';
 UPDATE tblMen SET WEIGHT = 80 WHERE NAME = '하하하';
 
+
 select * from tblLogMen;
+
+
+
+
+
+/* 2021-06-04 */
+
+/*
+
+    [for each row]
+    1. 생략
+        - 문장 단위 트리거
+        - 트리거 실행 횟수 1회
+        - DML에 의해서 적용된 행의 갯수와 무관하게 단 1회만 실행
+        - 목적: 행동 자체가 중요한 트리거(적용된 레코드(데이터)는 그다지 중요하지 않다.)
+    
+    2. 사용
+        - 행 단위 트리거
+        - 트리거 실행 횟수 N회
+        - DML에 의해서 적용된 행의 갯수와 동일한 횟수만큼 실행
+        - 목적: 적용되는 레코드의 정보가 중요한 트리거
+            - 가상 컬럼(Pseudo Column)
+                a. :OLD     (앞에 콜론(:)이 붙음)  -> 이전상태
+                b. :NEW     (앞에 콜론(:)이 붙음)  -> 현재상태
+
+*/
+
+
+-- 트리거 발생 확인
+SELECT * FROM TBLTODO;
+
+CREATE SEQUENCE seqTodo START WITH 21;
+
+INSERT INTO TBLTODO VALUES ( SEQTODO.NEXTVAL, '프로시저1', SYSDATE, NULL);
+INSERT INTO TBLTODO VALUES ( SEQTODO.NEXTVAL, '프리시저2', SYSDATE, NULL);
+INSERT INTO TBLTODO VALUES ( SEQTODO.NEXTVAL, '프로시저3', SYSDATE, NULL);
+INSERT INTO TBLTODO VALUES ( SEQTODO.NEXTVAL, '프로시저4', SYSDATE, NULL);
+INSERT INTO tblTODO VALUES ( SEQTODO.NEXTVAL, '프로시저5', SYSDATE, NULL);
+
+
+COMMIT;
+
+SET SERVEROUTPUT ON;
+
+-- tblTodo CCTV INESRT.1
+CREATE OR REPLACE TRIGGER TRGADDTODO 
+    AFTER
+    INSERT ON tblTodo 
+    FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('트리거 발생' || TO_CHAR(SYSDATE, 'HH24:MI:SS'));
+    DBMS_OUTPUT.PUT_LINE('새로 추가된 행의 정보: ' || :NEW.SEQ);
+    DBMS_OUTPUT.PUT_LINE('새로 추가된 행의 정보: ' || :NEW.TITLE);
+END;
+
+-- tblTodo CCTV 2. UPDATE
+CREATE OR REPLACE TRIGGER trgEditTodo 
+    AFTER
+    UPDATE ON tblTodo 
+    ---FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('수정 트리거 발생' || TO_CHAR(SYSDATE, 'HH24:MI:SS'));
+    DBMS_OUTPUT.PUT_LINE('수정되기 전 제목: ' || :OLD.TITLE);
+    DBMS_OUTPUT.PUT_LINE('수정된 후 제목: ' || :NEW.TITLE);
+    DBMS_OUTPUT.PUT_LINE(' ');
+END;
+
+UPDATE tblTodo SET TITLE = TITLE || '.' WHERE SEQ = 1;
+UPDATE tblTodo SET TITLE = TITLE || '@';
+
+SELECT * FROM TBLTODO;
+
+
+
+
+
+
+
+
+-- 프로시저 VS 트리거
+-- 회원제 + 게시판 운영 + 글작성 + 포인트 누적
+CREATE TABLE TBLUSER (
+    ID VARCHAR2(50) PRIMARY KEY,        -- 아이디(PK)
+    NAME VARCHAR2(20) NOT NULL,         -- 이름
+    POINT NUMBER DEFAULT 1000 NOT NULL  -- 포인트
+)
+
+CREATE TABLE TBLBOARD (         
+    SEQ NUMBER PRIMARY KEY,                         -- 글번호(PK)
+    SUBJECT VARCHAR2(100) NOT NULL,                 -- 제목
+    REGDATE DATE DEFAULT SYSDATE NOT NULL,          -- 날짜
+    ID VARCHAR2(50) NOT NULL REFERENCES TBLUSER(ID) -- 작성자(FK)
+)
+
+-- ANSI-SLQ로 포인트 누적 만들기
+INSERT INTO TBLUSER VALUES ('HONG', '홍길동', DEFAULT);
+SELECT * FROM TBLUSER;
+
+INSERT INTO TBLBOARD VALUES (1, '안녕하세요ㅎㅎ', DEFAULT, 'HONG'); -- 글작성
+UPDATE TBLUSER SET POINT = POINT + 100 WHERE ID = 'HONG';
+SELECT * FROM TBLBOARD;
+
+--> 트리거로 만들기
+-- 글쓰기(감시) -> INSERT,UPDATE(사건 발생) -> 포인트 증가/
+CREATE OR REPLACE TRIGGER TRG_ADD_BOARD
+    AFTER
+    INSERT ON TBLBOARD
+    FOR EACH ROW -- 글쓴이의 ID가 필요하기때문에....  --> 컬럼값을 사용할거라면 무조건 걸자
+BEGIN
+    UPDATE TBLUSER SET POINT = POINT + 100 WHERE ID = :NEW.ID;
+END;
+
+INSERT INTO TBLBOARD VALUES (2, '안녕하세요ㅎㅎ', DEFAULT, 'HONG'); -- 글작성
+
+
+
+-- 글 삭제 -> 포인트 감소
+CREATE OR REPLACE TRIGGER TRG_DELETE_BOARD
+    BEFORE
+    INSERT ON TBLBOARD
+    FOR EACH ROW -- 글쓴이의 ID가 필요하기때문에....  --> 컬럼값을 사용할거라면 무조건 걸자
+BEGIN
+    UPDATE TBLUSER SET POINT = POINT - 50 WHERE ID = :OLD.ID;
+END;
+    
+    
+DELETE FROM TBLBOARD WHERE SEQ = 1;
+
+SELECT * FROM TBLUSER;
+SELECT * FROM TBLBOARD;
+
+
+
+SELECT * FROM TBLBOARD;
+
+CREATE TABLE TBLCOMMENT (  
+    SEQ NUMBER PRIMARY KEY,                         -- 댓글번호(PK)
+    SUBJECT VARCHAR2(100) NOT NULL,                 -- 댓글제목
+    REGDATE DATE DEFAULT SYSDATE NOT NULL,          -- 날짜
+    PSEQ NUMBER NOT NULL REFERENCES TBLBOARD(SEQ)   -- 게시글 글 번호FK)
+);
+
+CREATE SEQUENCE SEQCOMMENT;
+
+SELECT * FROM TBLBOARD;
+
+INSERT INTO TBLCOMMENT VALUES (SEQCOMMENT.nextVAL, '댓글이야', DEFAULT, 2);
+
+SELECT * FROM TBLCOMMENT;
+
+
+-- 글 삭제: 먼저 댓글을 삭제하고, 본 글을 삭제
+-- 1. 작성된 댓글의 글 번호 SELECT
+-- 2. 1번 댓글들을 DELETE
+-- 3. 게시판 글을 DELETE
+
+DELETE FROM TBLBOARD WHERE SEQ = 2;
+
+CREATE OR REPLACE TRIGGER TRG_DELETE_BOARD
+    BEFORE
+    DELETE ON TBBOARD
+    FOR EACH ROW
+BEGIN
+    -- 댓글삭제
+    DELETE FROM TBLCOMMNET WHERE PSEQ = :OLD.SEQ; -- TBLBOARD.SEQ 컬럼값 > 삭제 
+    
+    
+    
+-- 트리거에 대해서 면접에서 자주 질문
+-- 1. 트리거가 뭐에요?
+-- 2. 프로젝트 할 때 트리거를 언제 적용해봤어요? 그 때 네가 느낀 것들??
+
+
+
+
+    
+/*
+    인덱스, INDEX
+    - 색인(INDEX): 키워드 나열 -> 페이지 연결
+    - 검색(SELECT)을 빠른 속도로 하기 위해서 사용하는 도구
+    - 특정 키워드(컬럼)만 모아놓은 별도의 테이블
+    
+    - 하나의 테이블 > 데이터 많이 저장(백만 단위 이상)
+        1. 상단에 있는 레코드 접근 -> 접근 속도 빠름
+        2. 하단에 있는 레코드 접근 -> 접근 속도 느림
+    
+    - 인덱스 사용
+        - SELECT 작업이 테이블 대상으로 실행 X
+        - SELECT 작업이 인덱스 대상으로 실행 O
+    
+    - 오라클은 테이블 생성 시  인덱스를 명시적으로 생성ㅎ
+    
+    1. 일반컬럼을 WHERE절에 조건으로 SELECT -> 속도 느림
+*/
+SELECT NUM FROM TBLINSA;
+SELECT NAME FROM TBLINSA;
+
+SELECT * FROM TBLINSA WHERE NUM = 1001;         -- 속도빠름
+SELECT * FROM TBLINSA WHERE NAME = '홍길동';    -- 속도느림
+
+
+CREATE SQLTABLE TBLINDEX
+AS
+    SELECT * FROM TBLADDRESSBOOK;
+INSERT INTO TBLINDEX
+    SELECT * FROM TBLINDEX;
+    
+    
+SELECT COUNT(*) FROM TBLINDEX;
+
+
+SELECT NAME FROM TBLINDEX WHERE NAME = '홍길동';
+
+
+SET TIMING ON;
+
+-- 인덱스가 없는 상태에 검색
+SELECT DISTINCT NAME FROM TBLINDEX WHERE NAME = '김희예';
+
+-- 인덱스 생성
+CREATE INDEX IDX_TBLINDEX_NAME
+    ON TBLINDEX(NAME);
+    
+-- 인덱스가 있는 상태에 검색    
+SELECT DISTINCT NAME FROM TBLINDEX WHERE NAME = '김희예';
+
+SELECT DISTINCT JOB FROM TBLINDEX WHERE JOB = '게임기획자';
+
+
+/*
+
+    인덱스 장점, 단점
+    - 검색 처리속도를 향상 시킨다.
+    - 고비용
+    
+    1. 인덱스를 사용해야 하는 경우
+        - 테이블 레코드가 많은 경우
+        - 인덱스를 적용한 컬럼이 WHERE절에 많이 사용되는 경우(**********)
+        - JOIN에 사용되는 컬럼(ON 부모.PK = 자식.FK)
+        - 검색결과가 원본 테이블의 레코드의 2~4%에 해당하는 경우
+        - 해당 컬럼이 NULL을 포함하는 경우(색인 테이블안에 NULL이 제외)
+    
+    2. 인덱스를 사용하면 안좋은 경우
+        - 테이블 레코드가 적은 경우
+        - 검색 결과가 많은 경우
+        - 원본 테이블(색인 컬럼) 에서 삽입, 수정, 삭제가 빈번한 경우
+
+*/
+
+-- TBLINSA 성격에 따라 INDEX 사용 유무가 정해진다.
+-- 정적 VS 동적
+-- 값이 얼마나 바뀌느냐. 안바뀌느냐.
+SELECT * FROM TBLINSA WHERE NAME = '검색어';
+
+
+/*
+
+    인덱스 종류
+    1. 비고유 인덱스
+    2. 고유 인덱스
+    3. 단일 인덱스
+    4. 복합 인덱스
+
+*/
+
+-- 1. 비고유 인덱스
+-- : 색인의 값이 중복이 가능하다.
+CREATE INDEX IDX_TBLINSA_BUSEO ON TBLINSA(BUSEO);
+
+-- 2. 고유 인덱스 
+-- : 색인의 값이 중복이 불가능하다. (PK, Unique)
+CREATE INDEX IDX_TBLINSA_NUM ON TBLINSA(NUM);
+
+-- 3. 단일 인덱스
+-- : 1개의 컬럼을 대상으로 인덱스 생성
+CREATE INDEX IDX_TBLINSA_NAME ON TBLINSA(NAME);
+
+-- 4. 복합 인덱스, 결합 인덱스
+SELECT * FROM TBLINSA WHERE BUSEO = '기획부';                    -- 인덱스 동작 O
+SELECT * FROM TBLINSA WHERE BUSEO = '기획부' AND JIKWI = '부장'; -- 인덱스 동작 X 
+SELECT * FROM TBLINSA WHERE BUSEO = '기획부' AND NAME = '홍길동';-- 인덱스 동작 X
+-- BUSEO AND JIKWI 두개로 지정하더라도, 인덱스에서는 'BUSEO + JIKWI'로 INDEX 1개로 인식한다.
+
+CREATE INDEX IDX_TBLINSA_BUSEO_NAME ON TBLINSA(BUSEO, NAME);
+SELECT * FROM TBLINSA WHERE BUSEO = '기획부' AND NAME = '홍길동';-- 인덱스 동작 O
+
+SELECT * FROM TBLINSA WHERE SUBSTR(NAME, 1, 1) = '홍'; -- 인덱스 동작 X
+
+CREATE INDEX IDX_TBLINSA_LASTNAME ON TBLINSA(SUBSTR(NAME, 1, 1));
+SELECT * FROM TBLINSA WHERE SUBSTR(NAME, 1, 1) = '홍'; -- 인덱스 동작 O
+SELECT * FROM IDX_TBLINSA_LASTNAME;
+
+
+-- 인덱스: 전체 직원을 대상으로 한달에 받는 실제 급여(BAISCPAY + SUDANG)를 조건으로 하는 질의가 다수 사용되어서
+-- 검색 속도를 향상 시키고자 생성했다.
+CREATE INDEX IDEX_TBLINSA_PAY ON TBLINSA(BASICPAY + SUDANG);
+SELECT * FROM TBLINSA WHERE BASICPAY + SUDANG > 1500000;
+
+
+-- 3~4개 추가 + 상황정리 +
+-- 프로젝트 > 맨마지막에 작업 > 만든 SQL에서 자주 보이는 WHERE절을 찾아서 > 몇개 정도 인덱스로 생성
+--                            > WHERE절 유일 > 업무상 호출 횟수가 많다. >인덱스 생성
