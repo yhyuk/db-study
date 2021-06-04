@@ -1877,12 +1877,14 @@ BEGIN
         - SELECT 작업이 테이블 대상으로 실행 X
         - SELECT 작업이 인덱스 대상으로 실행 O
     
-    - 오라클은 테이블 생성 시  인덱스를 명시적으로 생성ㅎ
-    
-    1. 일반컬럼을 WHERE절에 조건으로 SELECT -> 속도 느림
+    - 오라클은 테이블 생성 시  인덱스를 명시적으로 생성하지 않아도 자동으로 생성한다.
+        -> PK, UNIQUE 제약이 붙은 컬럼은 자동으로 인덱스가 생성된다.
+       1. PK를 WHERE절에 조건으로 SELECT       -> 속도 빠름
+       2. 일반컬럼을 WHERE절에 조건으로 SELECT  -> 속도 느림
 */
-SELECT NUM FROM TBLINSA;
-SELECT NAME FROM TBLINSA;
+-- NUM(PK), NAME(일반컬럼)
+SELECT NUM FROM TBLINSA;    --속도 동일
+SELECT NAME FROM TBLINSA;   --속도 동일
 
 SELECT * FROM TBLINSA WHERE NUM = 1001;         -- 속도빠름
 SELECT * FROM TBLINSA WHERE NAME = '홍길동';    -- 속도느림
@@ -1891,14 +1893,12 @@ SELECT * FROM TBLINSA WHERE NAME = '홍길동';    -- 속도느림
 CREATE SQLTABLE TBLINDEX
 AS
     SELECT * FROM TBLADDRESSBOOK;
+    
 INSERT INTO TBLINDEX
     SELECT * FROM TBLINDEX;
     
     
 SELECT COUNT(*) FROM TBLINDEX;
-
-
-SELECT NAME FROM TBLINDEX WHERE NAME = '홍길동';
 
 
 SET TIMING ON;
@@ -1909,10 +1909,8 @@ SELECT DISTINCT NAME FROM TBLINDEX WHERE NAME = '김희예';
 -- 인덱스 생성
 CREATE INDEX IDX_TBLINDEX_NAME
     ON TBLINDEX(NAME);
-    
 -- 인덱스가 있는 상태에 검색    
 SELECT DISTINCT NAME FROM TBLINDEX WHERE NAME = '김희예';
-
 SELECT DISTINCT JOB FROM TBLINDEX WHERE JOB = '게임기획자';
 
 
@@ -1952,16 +1950,13 @@ SELECT * FROM TBLINSA WHERE NAME = '검색어';
 
 */
 
--- 1. 비고유 인덱스
--- : 색인의 값이 중복이 가능하다.
+-- 1. 비고유 인덱스: 색인의 값이 중복이 가능하다.
 CREATE INDEX IDX_TBLINSA_BUSEO ON TBLINSA(BUSEO);
 
--- 2. 고유 인덱스 
--- : 색인의 값이 중복이 불가능하다. (PK, Unique)
+-- 2. 고유 인덱스 : 색인의 값이 중복이 불가능하다. (PK, Unique)
 CREATE INDEX IDX_TBLINSA_NUM ON TBLINSA(NUM);
 
--- 3. 단일 인덱스
--- : 1개의 컬럼을 대상으로 인덱스 생성
+-- 3. 단일 인덱스 : 1개의 컬럼을 대상으로 인덱스 생성
 CREATE INDEX IDX_TBLINSA_NAME ON TBLINSA(NAME);
 
 -- 4. 복합 인덱스, 결합 인덱스
